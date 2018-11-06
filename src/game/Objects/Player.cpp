@@ -12805,10 +12805,6 @@ void Player::AddQuest(Quest const *pQuest, Object *questGiver)
             case TYPEID_UNIT:
                 sScriptMgr.OnQuestAccept(this, (Creature*)questGiver, pQuest);
                 break;
-            case TYPEID_ITEM:
-            case TYPEID_CONTAINER:
-                sScriptMgr.OnQuestAccept(this, (Item*)questGiver, pQuest);
-                break;
             case TYPEID_GAMEOBJECT:
                 sScriptMgr.OnQuestAccept(this, (GameObject*)questGiver, pQuest);
                 break;
@@ -13562,7 +13558,7 @@ bool Player::TakeOrReplaceQuestStartItems(uint32 quest_id, bool msg, bool giveQu
     // If nullptr, someone messed up in DB
     ItemPrototype const* pItem = sObjectMgr.GetItemPrototype(srcItemID);
 
-    if (nullptr == pItem)
+    if (!pItem)
         return true;
 
     uint32 count = qInfo->GetSrcItemCount();
