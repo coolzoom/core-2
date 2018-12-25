@@ -21178,3 +21178,157 @@ void Player::CreatePacketBroadcaster()
     m_broadcaster = std::make_shared<PlayerBroadcaster>(m_session->GetSocket(), GetObjectGuid());
     sWorld.GetBroadcaster()->RegisterPlayer(m_broadcaster);
 }
+
+//dual spec
+void Player::_SaveAlternativeSpec()
+{
+	sLog.outError("Saving spec");
+	//At first, save spells.
+	std::ostringstream ss;
+	ss << "REPLACE INTO character_altspec (guid, altspells) VALUES ('" << GetGUIDLow() << "', '";
+	//Okay, now serialize it into string of ids, separated by whitespace
+	for (SpellIDList::iterator it = m_altspec_talents.begin(); it != m_altspec_talents.end(); it++)
+		ss << *it << " ";
+	ss << "')";
+	sLog.outError("Spells serialized");
+
+	//Nice, it saved!
+	CharacterDatabase.PExecute(ss.str().c_str());
+	sLog.outError("Spells saved");
+
+	//Now turn of action buttons
+	//Before - remove all player keys
+	// CharacterDatabase.PExecute("DELETE FROM character_altspec_action WHERE guid = '%u'", GetGUIDLow());
+	// sLog.outError("Old buttons removed");
+
+	// //Now - seek all needed keys and insert into DB
+	// for (uint32 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+	// {
+	//     //Find button by button id
+	//     ActionButtonList::const_iterator itr = m_altspec_actionButtons.find(button);
+	//     //STL returns end() if not found. We need to skip it.
+	//     if (itr != m_altspec_actionButtons.end())
+	//     {
+	//         //Okay, now we're ready to insert it
+	//         CharacterDatabase.PExecute("INSERT INTO character_altspec_action (guid,button,action,type,misc) VALUES ('%u', '%u', '%u', '%u', '%u')",
+	//             GetGUIDLow(), button, itr->second.action, itr->second.type, itr->second.misc);
+	//     }
+	// }
+	//All done
+}
+
+uint32 Player::SwapSpec()
+{
+	/*
+		Error codes:
+		2 - Too low level
+		3 - Too fast
+
+		Strategy:
+		1) save keys
+		2) save talents
+		3) load talents
+		4) load keys
+	*/
+
+	//Level check
+	if (getLevel() <= 10)
+		return 2;
+
+	//Time check
+	if (uint32(time(NULL) - m_altspec_lastswap) < sWorld.getConfig(CONFIG_DUAL_SPEC_TIME_DELTA))
+		return 3;
+
+	/*********************************************************/
+	/***                   SAVE KEYS                       ***/
+	/*********************************************************/
+	// sLog.outError("Save keys");
+	// //Save buttons before
+	// ActionButtonList tmp_buttons = m_altspec_actionButtons;
+
+	// //Just copy current content
+	// m_altspec_actionButtons = m_actionButtons;
+
+	/*********************************************************/
+	/***                   SAVE TALENTS                    ***/
+	/*********************************************************/
+	sLog.outError("Save talents");
+	//copy current talents list
+	SpellIDList tmp = m_altspec_talents;
+
+	//erese it for populating using current talents
+	m_altspec_talents.clear();
+
+	//Find all talents, general idea from Player::resetTalents
+	for (unsigned int i = 0; i < sTalentStore.GetNumRows(); ++i) {
+		TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
+		if (!talentInfo) continue;
+		TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+		if (!talentTabInfo) continue;
+		if ((getClassMask() & talentTabInfo->ClassMask) == 0) continue;
+		for (int j = 0; j < 5; ++j) {
+			for (PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();) {
+
+				//skip disabled talents like Pyroblast or some else
+				if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled)
+				{
+					++itr;
+					continue;
+				}
+
+				//for spells, which can be updated via trainers(like Pyroblast), we can'n just compare, cuz
+				// >1 ranks are not in talens store. So, first rank it is. We can just get lowerest rank of skill
+				// and search it in the talents storage.
+				uint32 itrFirstId = sSpellMgr.GetFirstSpellInChain(itr->first);
+
+				//now - just compare. Also, it make sense to add "|| spellmgr.IsSpellLearnToSpell(talentInfo->RankID[j],itrFirstId)"
+				//but i have no idea what it is, it uses in the Player::resetTalents function and it may be needed.
+				//Also, there is a some spells like Prayer of Spirit, which not in talents tree, but its depends on talents.
+				//So, we need just to get required spell by current spell and find is it in player spellbook.
+				if (itrFirstId == talentInfo->RankID[j]
+					|| sSpellMgr.IsSpellLearnToSpell(talentInfo->RankID[j], itrFirstId)
+					)//|| HasSpell(spellmgr.GetSpellRequired(itrFirstId)))
+					m_altspec_talents.push_back(itr->first);
+				++itr;
+			}
+		}
+	}
+
+	/*********************************************************/
+	/***                   LOAD TALENTS                    ***/
+	/*********************************************************/
+	sLog.outError("Load talents");
+	ResetTalents(true);
+	for (SpellIDList::iterator it = tmp.begin(); it != tmp.end(); it++)
+	{
+		LearnSpell(*it, true);
+	}
+	InitTalentForLevel();
+	//learnSkillRewardedSpells();
+
+	/*********************************************************/
+	/***                   LOAD KEYS                       ***/
+	/*********************************************************/
+	// sLog.outError("Load keys");
+	// //Clean up
+	// for (int button = 0; button < MAX_ACTION_BUTTONS; ++button)
+	//     removeActionButton(button);
+	// sLog.outError("Keys cleaned");
+	// //Aaand... load
+	// for (int button = 0; button < MAX_ACTION_BUTTONS; ++button)
+	// {
+	//     //Find button by button id
+	//     ActionButtonList::const_iterator itr = m_altspec_actionButtons.find(button);
+	//     //STL returns end() if not found. We need to skip it.
+	//     if (itr != m_altspec_actionButtons.end())
+	//         addActionButton(button, itr->second.action, itr->second.type, itr->second.misc);
+	// }
+	// sLog.outError("Keys added");
+
+	// SendInitialActionButtons();//doesnt work
+
+	//Drop mana and health to minimum for preventing of profit from swappings
+	SetHealth(12);
+	SetPower(POWER_MANA, 12);
+	return 1; //Okay
+}

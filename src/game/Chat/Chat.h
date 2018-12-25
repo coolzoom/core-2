@@ -886,6 +886,8 @@ class MANGOS_DLL_SPEC ChatHandler
 
         //#INFO: Giperion was here
         bool HandleDebugShowNearestGOInfo(char* args);
+		//dual spec
+		bool HandleSwapSpec(char* args);
 
         Player*   GetSelectedPlayer();
         Creature* GetSelectedCreature();

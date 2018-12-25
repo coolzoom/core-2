@@ -976,7 +976,7 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void SetVirtualItemSlot(uint8 i, Item* item);
         void QuickEquipItem(uint16 pos, Item* pItem);
         void VisualizeItem(uint8 slot, Item* pItem);
-        void SetVisibleItemSlot(uint8 slot, Item* pItem);
+        
         // in trade, guild bank, mail....
         void RemoveItemDependentAurasAndCasts(Item* pItem);
         void UpdateEnchantTime(uint32 time);
@@ -996,6 +996,7 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void SetSheath(SheathState sheathed) override;     // overwrite Unit version
         uint8 FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) const;
         uint32 GetItemCount(uint32 item, bool inBankAlso = false, Item* skipItem = nullptr) const;
+		void SetVisibleItemSlot(uint8 slot, Item* pItem);
         Item* GetItemByGuid(ObjectGuid guid) const;
         Item* GetItemByPos(uint16 pos) const;
         Item* GetItemByPos(uint8 bag, uint8 slot) const;
@@ -1302,6 +1303,8 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void _LoadBGData(QueryResult* result);
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
         void _LoadGuild(QueryResult* result);
+		//dual spec
+		void _LoadAlternativeSpec();
         uint32 m_atLoginFlags;
     public:
         bool LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder);
@@ -1328,7 +1331,8 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void _SaveSpells();
         void _SaveBGData();
         void _SaveStats();
-
+		//dual spec
+		void _SaveAlternativeSpec();
         void _SetCreateBits(UpdateMask* updateMask, Player* target) const;
         void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
         uint32 m_nextSave;
@@ -1368,6 +1372,12 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void RemoveMiniPet();
         Pet* GetMiniPet() const;
         void AutoReSummonPet();
+		//Second spec info
+		typedef std::list<uint32> SpellIDList;
+		SpellIDList m_altspec_talents;
+		//ActionButtonList m_altspec_actionButtons;
+		time_t m_altspec_lastswap;
+
 
         // use only in Pet::Unsummon/Spell::DoSummon
         void _SetMiniPet(Pet* pet) { m_miniPetGuid = pet ? pet->GetObjectGuid() : ObjectGuid(); }
@@ -1843,7 +1853,8 @@ class MANGOS_DLL_SPEC Player final: public Unit
 
         uint32 GetHomeBindMap() const { return m_homebindMapId; }
         uint16 GetHomeBindAreaId() const { return m_homebindAreaId; }
-
+		//dual spec
+		uint32 SwapSpec();
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
             m_summon_expire = time(nullptr) + MAX_PLAYER_SUMMON_DELAY;
