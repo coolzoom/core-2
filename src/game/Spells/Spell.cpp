@@ -629,22 +629,6 @@ void Spell::FillTargetMap()
                 break;
         }
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER && !(m_spellInfo->AttributesEx & SPELL_ATTR_EX_NO_THREAT))
-        {
-            Player *me = (Player*)m_caster;
-            for (UnitList::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); ++itr)
-            {
-                Player *targetOwner = (*itr)->GetCharmerOrOwnerPlayerOrPlayerItself();
-                if ((targetOwner && targetOwner != me && targetOwner->IsPvP() && !me->IsInDuelWith(targetOwner)) || // PvP flagged players
-                    ((*itr)->IsCreature() && (*itr)->IsPvP()))                                                      // PvP flagged creatures
-                {
-                    me->UpdatePvP(true);
-                    me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
-                    break;
-                }
-            }
-        }
-
         for (UnitList::iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end();)
         {
             if (!CheckTarget(*itr, SpellEffectIndex(i)))
@@ -1181,27 +1165,35 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         {
             if (real_caster && real_caster != unit)
             {
-                // can cause back attack (if detected)
-                bool backAttack = m_spellInfo->Id != 3600 && // Earthbind never set in combat
-                    !IsPositiveSpell(m_spellInfo) && m_caster->isVisibleForOrDetect(unit, unit, false);
-                if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_POSSESS) || m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO)
-                    backAttack = false;
-                // Pickpocket can cause back attack if failed
-                if (m_spellInfo->AttributesEx & SPELL_ATTR_EX_IS_PICKPOCKET)
+                if (!IsPositiveSpell(m_spellInfo) && (m_caster->isVisibleForOrDetect(unit, unit, false) || m_spellInfo->HasAttribute(SPELL_ATTR_EX_IS_PICKPOCKET)))
                 {
-                    real_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-                    backAttack = true;
-                }
-                if (backAttack)
-                {
-                    if (!unit->isInCombat())
-                        unit->AttackedBy(real_caster);
+                    bool combat = (m_spellInfo->Id != 3600) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO);
 
-                    unit->AddThreat(real_caster);
-                    unit->SetInCombatWith(real_caster);
-                    real_caster->SetInCombatWith(unit);
-                    if (Unit* owner = real_caster->GetOwner())
-                        owner->SetInCombatWith(unit);
+                    // Pickpocket can cause back attack if failed
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_IS_PICKPOCKET))
+                    {
+                        real_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                        combat = true;
+                    }
+
+                    if (combat)
+                    {
+                        if (!IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_POSSESS))
+                        {
+                            if (!unit->isInCombat())
+                                unit->AttackedBy(real_caster);
+
+                            unit->AddThreat(real_caster);
+                            unit->SetInCombatWithAggressor(real_caster);
+                        }
+                        
+                        real_caster->SetInCombatWithVictim(unit);
+                    }
+                    else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
+                    {
+                        unit->SetOutOfCombatWithAggressor(real_caster);
+                        real_caster->SetOutOfCombatWithVictim(unit);
+                    }
                 }
             }
         }
@@ -1339,6 +1331,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
             // trigger weapon enchants for weapon based spells; exclude spells that stop attack, because may break CC
             if (m_spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && !(m_spellInfo->Attributes & SPELL_ATTR_STOP_ATTACK_TARGET))
                 ((Player*)m_caster)->CastItemCombatSpell(unitTarget, m_attackType);
+
+            // trigger mainhand weapon procs for shield attacks (Shield Bash, Shield Slam) NOTE: vanilla only mechanic, patched out in 2.0.1
+            else if (m_spellInfo->EquippedItemClass == ITEM_CLASS_ARMOR && m_spellInfo->EquippedItemSubClassMask & (1 << ITEM_SUBCLASS_ARMOR_SHIELD)
+                && (m_spellInfo->SpellIconID == 280 || m_spellInfo->SpellIconID == 413))
+                ((Player*)m_caster)->CastItemCombatSpell(unitTarget, BASE_ATTACK);
 
             // Bloodthirt triggers main hand despite not requiring weapon
             // Execute damage component triggers main hand
@@ -1551,40 +1548,40 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
             }
 
             // can cause back attack (if detected), stealth removed at Spell::cast if spell break it
-            if (!(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && (!IsPositiveSpell(m_spellInfo) || IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_DISPEL)) &&
+            if ((!IsPositiveSpell(m_spellInfo) || IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_DISPEL)) &&
                     !m_spellInfo->IsFitToFamily<SPELLFAMILY_ROGUE, CF_ROGUE_SAP>() && // Sap handled somewhere else. Without this, sap will remove stealth if the rogue is visible.
                     (m_spellInfo->Id == 6358 || // Exception to fix succubus seduction.
                      m_caster->isVisibleForOrDetect(unit, unit, false)))
             {
-                // use speedup check to avoid re-remove after above lines
-                if (m_spellInfo->AttributesEx & SPELL_ATTR_EX_NOT_BREAK_STEALTH)
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
                 {
-                    unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-                    unit->RemoveNonPassiveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+                    // use speedup check to avoid re-remove after above lines
+                    if (m_spellInfo->AttributesEx & SPELL_ATTR_EX_NOT_BREAK_STEALTH)
+                    {
+                        unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                        unit->RemoveNonPassiveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+                    }
+
+                    // caster can be detected but have stealth aura
+                    m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                    m_caster->RemoveNonPassiveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+
+                    if (!IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_POSSESS))
+                    {
+                        if (!unit->isInCombat())
+                            unit->AttackedBy(realCaster);
+
+                        unit->AddThreat(realCaster);
+                        unit->SetInCombatWithAggressor(realCaster);
+                    }
+
+                    realCaster->SetInCombatWithVictim(unit);
                 }
-
-                // caster can be detected but have stealth aura
-                m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-                m_caster->RemoveNonPassiveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
-
-                // Fait dans Unit::DealDamage, car etre assis ou debout change le % de critiques par exemple.
-                //if (!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNNED))
-                //    unit->SetStandState(UNIT_STAND_STATE_STAND);
-
-                if (!IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_POSSESS))
+                else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
                 {
-                    if (!unit->isInCombat())
-                        unit->AttackedBy(realCaster);
-
-                    unit->AddThreat(realCaster);
-                    unit->SetInCombatWith(realCaster);
+                    unit->SetOutOfCombatWithAggressor(realCaster);
+                    realCaster->SetOutOfCombatWithVictim(unit);
                 }
-
-                realCaster->SetInCombatWith(unit);
-                if (Unit* owner = realCaster->GetOwner())
-                    owner->SetInCombatWith(unit);
-
-                realCaster->SetContestedPvP(unit);
             }
         }
         else
@@ -1597,14 +1594,18 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
                 return;
             }
 
-            // assisting case, healing and resurrection
-            if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
-                realCaster->SetContestedPvP();
-
-            if (unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+            if (unit->isInCombat())
             {
-                realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
-                unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
+                if (!(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+                {
+                    realCaster->SetInCombatWithAssisted(unit);
+                    unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
+                }
+            }
+            else if (unit->IsPvP())
+            {
+                if (Player* pPlayer = realCaster->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    pPlayer->UpdatePvP(true);
             }
         }
     }
@@ -3301,8 +3302,15 @@ SpellCastResult Spell::prepare(Aura* triggeredByAura, uint32 chance)
 
         // If timer = 0, it's an instant cast spell and will be casted on the next tick.
         // Cast completion will remove all any stealth/invis auras
-        if (m_timer) {
+        if (m_timer)
+        {
+            // World of Warcraft Client Patch 1.10.0 (2006-03-28)
+            // - Stealth and Invisibility effects will now be canceled at the
+            //   beginning of an action(spellcast, ability use etc...), rather than
+            //   at the completion of the action.
+#if SUPPORTED_CLIENT_BUILD > CLIENT_BUILD_1_9_4
             RemoveStealthAuras();
+#endif
             
             // If using a game object we need to remove any remaining invis auras. Should only
             // ever be Gnomish Cloaking Device, since it's a special case and not removed on
@@ -3621,7 +3629,7 @@ void Spell::cast(bool skipCheck)
 
     // CAST SPELL
     // Remove any remaining invis auras on cast completion, should only be gnomish cloaking device
-    if (!m_IsTriggeredSpell)
+    if (!m_IsTriggeredSpell  && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
         m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ON_CAST_SPELL);
     
     SendSpellCooldown();
@@ -4895,8 +4903,6 @@ void Spell::TakeReagents()
         return;
 
     Player* p_caster = (Player*)m_caster;
-    if (p_caster->CanNoReagentCast(m_spellInfo))
-        return;
 
     for (uint32 x = 0; x < MAX_SPELL_REAGENTS; ++x)
     {
@@ -5244,7 +5250,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->isGameMaster() &&
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->IsGameMaster() &&
             sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) &&
             VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled())
     {
@@ -6130,7 +6136,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_TRY_AGAIN;
 
                     // Prevent looting chests while totally immune
-                    if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST && m_caster->ToPlayer()->isTotalImmune())
+                    if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST && m_caster->ToPlayer()->IsTotalImmune())
                         return SPELL_FAILED_DAMAGE_IMMUNE;
                 }
                 else if (Item* item = m_targets.getItemTarget())
@@ -6428,10 +6434,16 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
         }
+        // World of Warcraft Client Patch 1.10.0 (2006-03-28)
+        //  - All spells / abilities that remove existing effects(e.g.Dispel Magic,
+        //    Cleanse, Remove Curse etc...) will now verify that there is an effect
+        //    that can be removed before casting.
+#if SUPPORTED_CLIENT_CLIENT > CLIENT_BUILD_1_9_4
         if (!bFoundOneDispell)
         {
             return SPELL_FAILED_NOTHING_TO_DISPEL;
         }
+#endif
     }
 
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -7216,7 +7228,6 @@ SpellCastResult Spell::CheckItems()
     // check reagents (ignore triggered spells with reagents processed by original spell) and special reagent ignore case.
     if (!IgnoreItemRequirements())
     {
-        if (!p_caster->CanNoReagentCast(m_spellInfo))
         {
             for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
             {
@@ -7267,27 +7278,6 @@ SpellCastResult Spell::CheckItems()
 
         if (totems != 0)
             return SPELL_FAILED_ITEM_GONE;                      //[-ZERO] not sure of it
-
-        /*[-ZERO] to rewrite?
-        // Check items for TotemCategory  (items presence in inventory)
-        uint32 TotemCategory = MAX_SPELL_TOTEM_CATEGORIES;
-        for(int i= 0; i < MAX_SPELL_TOTEM_CATEGORIES; ++i)
-        {
-            if (m_spellInfo->TotemCategory[i] != 0)
-            {
-                if (p_caster->HasItemTotemCategory(m_spellInfo->TotemCategory[i]))
-                {
-                    TotemCategory -= 1;
-                    continue;
-                }
-            }
-            else
-                TotemCategory -= 1;
-        }
-
-        if (TotemCategory != 0)
-            return SPELL_FAILED_TOTEM_CATEGORY;                 //0x7B
-        */
     }
 
     switch (m_spellInfo->Id)
@@ -7704,7 +7694,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
         if (((Player*)target)->GetVisibility() == VISIBILITY_OFF)
             return false;
 
-        if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo))
+        if (((Player*)target)->IsGameMaster() && !IsPositiveSpell(m_spellInfo))
             return false;
     }
 

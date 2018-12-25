@@ -100,8 +100,7 @@ struct CreatureInfo
     uint32  minmana;
     uint32  maxmana;
     uint32  armor;
-    uint32  faction_A;
-    uint32  faction_H;
+    uint32  faction;
     uint32  npcflag;
     float   speed_walk;
     float   speed_run;
@@ -802,6 +801,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool HasQuest(uint32 quest_id) const override;
         bool HasInvolvedQuest(uint32 quest_id)  const override;
+
+        uint32 GetDefaultGossipMenuId() const override { return GetCreatureInfo()->GossipMenuId; }
 
         GridReference<Creature> &GetGridRef() { return m_gridRef; }
         bool IsRegeneratingHealth() const { return m_regenHealth; }

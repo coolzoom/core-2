@@ -79,6 +79,14 @@ enum ChatCommandSearchResult
     CHAT_COMMAND_UNKNOWN_SUBCOMMAND,                        // command found but some level subcommand not find in subcommand list
 };
 
+enum PlayerChatTag
+{
+    CHAT_TAG_NONE               = 0,
+    CHAT_TAG_AFK                = 1,
+    CHAT_TAG_DND                = 2,
+    CHAT_TAG_GM                 = 3,
+};
+
 class MANGOS_DLL_SPEC ChatHandler
 {
     public:
@@ -812,6 +820,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleFearCommand(char* args);
         bool HandleDamageCommand(char* args);
         bool HandleReviveCommand(char* args);
+        bool HandleReplenishCommand(char* args);
         bool HandleModifyMorphCommand(char* args);
         bool HandleAuraCommand(char* args);
         bool HandleUnAuraCommand(char* args);
@@ -878,9 +887,9 @@ class MANGOS_DLL_SPEC ChatHandler
         //#INFO: Giperion was here
         bool HandleDebugShowNearestGOInfo(char* args);
 
-        Player*   getSelectedPlayer();
-        Creature* getSelectedCreature();
-        Unit*     getSelectedUnit();
+        Player*   GetSelectedPlayer();
+        Creature* GetSelectedCreature();
+        Unit*     GetSelectedUnit();
 
         // extraction different type params from args string, all functions update (char** args) to first unparsed tail symbol at return
         void  SkipWhiteSpaces(char** args);

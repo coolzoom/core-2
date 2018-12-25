@@ -364,7 +364,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, SpellAuraHolder* holder, S
     // In most cases req get honor or XP from kill
     if (EventProcFlag & PROC_FLAG_KILL && GetTypeId() == TYPEID_PLAYER)
     {
-        bool allow = ((Player*)this)->isHonorOrXPTarget(pVictim);
+        bool allow = ((Player*)this)->IsHonorOrXPTarget(pVictim);
         if (!allow)
             return false;
     }
@@ -1105,7 +1105,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
     if (!target || target != this && !target->isAlive())
         return SPELL_AURA_PROC_FAILED;
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(triggered_spell_id))
+    if (cooldown && HasSpellCooldown(triggered_spell_id))
         return SPELL_AURA_PROC_FAILED;
 
     if (basepoints[EFFECT_INDEX_0] || basepoints[EFFECT_INDEX_1] || basepoints[EFFECT_INDEX_2])
@@ -1117,8 +1117,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
     else
         CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura);
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
+    if (cooldown)
+        AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
 
     return SPELL_AURA_PROC_OK;
 }
@@ -1316,6 +1316,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
         case SPELLFAMILY_DRUID:
             break;
         case SPELLFAMILY_HUNTER:
+#if SUPPORTED_CLIENT_BUILD > CLIENT_BUILD_1_8_4
             switch (auraSpellInfo->Id)
             {
                 // Patch 1.9: Aspect of the Pack and Aspect of the Cheetah - Periodic damage will no longer trigger the Dazed effect.
@@ -1324,9 +1325,79 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
                     if (procFlags & (PROC_FLAG_ON_DO_PERIODIC | PROC_FLAG_ON_TAKE_PERIODIC | PROC_FLAG_SUCCESSFUL_PERIODIC_SPELL_HIT | PROC_FLAG_TAKEN_PERIODIC_SPELL_HIT))
                         return SPELL_AURA_PROC_FAILED;
             }
+#endif
             break;
         case SPELLFAMILY_PALADIN:
         {
+#if SUPPORTED_CLIENT_BUILD <= CLIENT_BUILD_1_9_4
+            if (auraSpellInfo->IsFitToFamilyMask<CF_PALADIN_SEALS>())
+            {
+                uint32 spellId = 0;
+                switch (auraSpellInfo->Id)
+                {
+                    case 21084:
+                        spellId = 25742;
+                        break; // Rank 1
+                    case 20287:
+                        spellId = 25740;
+                        break; // Rank 2
+                    case 20288:
+                        spellId = 25739;
+                        break; // Rank 3
+                    case 20289:
+                        spellId = 25738;
+                        break; // Rank 4
+                    case 20290:
+                        spellId = 25737;
+                        break; // Rank 5
+                    case 20291:
+                        spellId = 25736;
+                        break; // Rank 6
+                    case 20292:
+                        spellId = 25735;
+                        break; // Rank 7
+                    case 20293:
+                        spellId = 25713;
+                        break; // Rank 8
+                }
+                if (spellId)
+                {
+                    float MAX_WSP = 4.0f;
+                    float MIN_WSP = 1.5f;
+
+                    Item *item = static_cast<Player*>(this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                    float speed = (item ? item->GetProto()->Delay : BASE_ATTACK_TIME) / 1000.0f;
+
+                    float minDmg = triggerAmount / 87.0f;
+                    float maxDmg = triggerAmount / 25.0f;
+
+                    float damageBasePoints = (maxDmg - minDmg) * ((speed - MIN_WSP) / (MAX_WSP - MIN_WSP)) + minDmg;
+
+                    // Apply Improved Seal of Rightousness talent
+                    // Modifier is applied on base damage only (changed patch 2.1.0)
+                    uint32 impSoRList[] = { 20224, 20225, 20330, 20331, 20332 };
+                    for (int i = 0; i < 5; ++i) {
+                        SpellModifier *mod = static_cast<Player*>(this)->GetSpellMod(SPELLMOD_ALL_EFFECTS, impSoRList[i]);
+                        if (mod && mod->type == SPELLMOD_PCT && mod->value > 0)
+                            damageBasePoints += damageBasePoints*(float)mod->value / 100.0f;
+                    }
+
+                    int32 damagePoint = urand(0, 1) ? floor(damageBasePoints) : ceil(damageBasePoints);
+
+                    // apply damage bonuses manually
+                    if (damagePoint >= 0)
+                    {
+                        damagePoint = SpellDamageBonusDone(pVictim, auraSpellInfo, damagePoint, SPELL_DIRECT_DAMAGE);
+                        damagePoint = pVictim->SpellDamageBonusTaken(this, auraSpellInfo, damagePoint, SPELL_DIRECT_DAMAGE);
+                    }
+
+                    CastCustomSpell(pVictim, spellId, &damagePoint, nullptr, nullptr, true, nullptr, triggeredByAura);
+                    // Seal of Righteousness can proc weapon enchants. mechanic removed in 2.1.0
+                    static_cast<Player*>(this)->CastItemCombatSpell(pVictim, BASE_ATTACK);
+                    return SPELL_AURA_PROC_OK;                                // no hidden cooldown
+                }
+            }
+#endif
             // Judgement of Light and Judgement of Wisdom
             if (auraSpellInfo->IsFitToFamilyMask<CF_PALADIN_JUDGEMENT_OF_WISDOM_LIGHT>())
             {
@@ -1492,7 +1563,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
         }
     }
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(trigger_spell_id))
+    if (cooldown && HasSpellCooldown(trigger_spell_id))
         return SPELL_AURA_PROC_FAILED;
 
     // try detect target manually if not set
@@ -1512,8 +1583,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
     else
         CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura, GetObjectGuid(), nullptr, procSpell);
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
+    if (cooldown)
+        AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
 
     return SPELL_AURA_PROC_OK;
 }
@@ -1634,13 +1705,13 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, uint3
         return SPELL_AURA_PROC_FAILED;
     }
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(triggered_spell_id))
+    if (cooldown && HasSpellCooldown(triggered_spell_id))
         return SPELL_AURA_PROC_FAILED;
 
     CastSpell(pVictim, triggered_spell_id, true, castItem, triggeredByAura);
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
+    if (cooldown)
+        AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
 
     return SPELL_AURA_PROC_OK;
 }

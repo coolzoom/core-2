@@ -664,13 +664,8 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_UINT32_WORLD_BOSS_LEVEL_DIFF, "WorldBossLevelDiff", 3);
 
-    // note: disable value (-1) will assigned as 0xFFFFFFF, to prevent overflow at calculations limit it to max possible player level MAX_LEVEL(100)
-    setConfig(CONFIG_UINT32_QUEST_LOW_LEVEL_HIDE_DIFF, "Quests.LowLevelHideDiff", 4);
-    if (getConfig(CONFIG_UINT32_QUEST_LOW_LEVEL_HIDE_DIFF) > MAX_LEVEL)
-        setConfig(CONFIG_UINT32_QUEST_LOW_LEVEL_HIDE_DIFF, MAX_LEVEL);
-    setConfig(CONFIG_UINT32_QUEST_HIGH_LEVEL_HIDE_DIFF, "Quests.HighLevelHideDiff", 7);
-    if (getConfig(CONFIG_UINT32_QUEST_HIGH_LEVEL_HIDE_DIFF) > MAX_LEVEL)
-        setConfig(CONFIG_UINT32_QUEST_HIGH_LEVEL_HIDE_DIFF, MAX_LEVEL);
+    setConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF, "Quests.LowLevelHideDiff", 4);
+    setConfig(CONFIG_INT32_QUEST_HIGH_LEVEL_HIDE_DIFF, "Quests.HighLevelHideDiff", 7);
 
     setConfig(CONFIG_BOOL_QUEST_IGNORE_RAID, "Quests.IgnoreRaid", false);
 
@@ -1027,7 +1022,7 @@ public:
     }
 };
 
-char* const World::GetPatchName() const
+char const* World::GetPatchName() const
 {
     switch(GetWowPatch())
     {
@@ -1097,6 +1092,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadAllIdentifiers();
 
     sLog.outString("Loading Instance Statistics...");
+    sLog.outString();
     sInstanceStatistics.LoadFromDB();
 
     ///- Chargements des variables (necessaire pour le OutdoorJcJ)
@@ -1121,22 +1117,21 @@ void World::SetInitialWorldSettings()
         CharacterDatabase.PExecute("DELETE FROM corpse WHERE corpse_type = '0' OR time < (UNIX_TIMESTAMP()-'%u')", 3 * DAY);
     }
 
-    sLog.outString();
+    sLog.outString("Loading spells ...");
     sSpellMgr.LoadSpells();
 
-    sLog.outString();
     sObjectMgr.LoadFactions();
 
-    sLog.outString();
+    sLog.outString("Loading sounds ...");
     sObjectMgr.LoadSoundEntries();
 
-    sLog.outString();
+    sLog.outString("Loading taxi nodes ...");
     sObjectMgr.LoadTaxiNodes();
 
-    sLog.outString();
+    sLog.outString("Loading area triggers ...");
     sObjectMgr.LoadAreaTriggers();
 
-    sLog.outString();
+    sLog.outString("Loading skill line abilities ...");
     sObjectMgr.LoadSkillLineAbility();
 
     ///- Load the DBC files
@@ -1297,6 +1292,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadGameobjectsRequirements();
 
     sLog.outString("Loading CreatureLinking Data...");      // must be after Creatures
+    sLog.outString();
     sCreatureLinkingMgr.LoadFromDB();
 
     sLog.outString("Loading Objects Pooling Data...");
@@ -1316,11 +1312,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Quests Greetings...");          // must be loaded after creature_template
     sObjectMgr.LoadQuestGreetings();
-    sLog.outString();
 
     sLog.outString("Loading Trainer Greetings...");
     sObjectMgr.LoadTrainerGreetings();
-    sLog.outString();
 
     sLog.outString("Loading Game Event Data...");           // must be after sPoolMgr.LoadFromDB and quests to properly load pool events and quests for events, but before area trigger teleports
     sLog.outString();
@@ -1518,6 +1512,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Checking all script texts...");         // must be after Load*Scripts calls
     sScriptMgr.CheckAllScriptTexts();
+    sLog.outString();
 
     sLog.outString("Loading CreatureEventAI Events...");
     sEventAIMgr.LoadCreatureEventAI_Events();
@@ -1591,6 +1586,7 @@ void World::SetInitialWorldSettings()
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    //depend on next event
 
+    sLog.outString();
     sLog.outString("Loading disabled spells");
     sObjectMgr.LoadSpellDisabledEntrys();
 
@@ -1614,6 +1610,7 @@ void World::SetInitialWorldSettings()
         sLog.outString("Loading PlayerBot ..."); // Requires Players cache
         sPlayerBotMgr.load();
 
+        sLog.outString();
         sLog.outString("Loading faction change ...");
         sObjectMgr.LoadFactionChangeReputations();
         sObjectMgr.LoadFactionChangeSpells();
@@ -1966,7 +1963,7 @@ void World::SendGMTicketText(const char* text)
             !itr->second->GetPlayer() ||
             !itr->second->GetPlayer()->IsInWorld() ||
             itr->second->GetSecurity() == SEC_PLAYER ||
-            !itr->second->GetPlayer()->isAcceptTickets())
+            !itr->second->GetPlayer()->IsAcceptTickets())
             continue;
 
         ChatHandler(itr->second->GetPlayer()).SendSysMessage(text);
@@ -1986,7 +1983,7 @@ void World::SendGMTicketText(int32 string_id, ...)
             !itr->second->GetPlayer() ||
             !itr->second->GetPlayer()->IsInWorld() ||
             itr->second->GetSecurity() == SEC_PLAYER ||
-            !itr->second->GetPlayer()->isAcceptTickets())
+            !itr->second->GetPlayer()->IsAcceptTickets())
             continue;
 
         wt_do(itr->second->GetPlayer());

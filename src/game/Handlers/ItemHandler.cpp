@@ -378,7 +378,9 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
 
         data << pProto->Delay;
         data << pProto->AmmoType;
+#if SUPPORTED_CLIENT_BUILD > CLIENT_BUILD_1_9_4
         data << (float)pProto->RangedModRange;
+#endif
 
         for (int s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
         {
@@ -800,7 +802,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid, uint8 menu_type)
         {
             if (ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item))
             {
-                if (!_player->isGameMaster())
+                if (!_player->IsGameMaster())
                 {
                     // class wrong item skip only for bindable case
                     if ((pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP)

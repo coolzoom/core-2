@@ -484,10 +484,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData *data /*=
 
     SelectLevel(GetCreatureInfo(), preserveHPAndPower ? GetHealthPercent() : 100.0f, 100.0f);
 
-    if (team == HORDE)
-        setFaction(GetCreatureInfo()->faction_H);
-    else
-        setFaction(GetCreatureInfo()->faction_A);
+    setFaction(GetCreatureInfo()->faction);
 
     SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->npcflag);
 
@@ -548,7 +545,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData *data /*=
 
     m_reputationId = -1;
     // checked and error show at loading templates
-    if (FactionTemplateEntry const* pFactionTemplate = sObjectMgr.GetFactionTemplateEntry(GetCreatureInfo()->faction_A))
+    if (FactionTemplateEntry const* pFactionTemplate = sObjectMgr.GetFactionTemplateEntry(GetCreatureInfo()->faction))
     {
         if (pFactionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP || IsCivilian())
             SetPvP(true);
@@ -2157,7 +2154,7 @@ SpellEntry const *Creature::ReachWithSpellCure(Unit *pVictim)
 bool Creature::IsVisibleInGridForPlayer(Player* pl) const
 {
     // gamemaster in GM mode see all, including ghosts
-    if (pl->isGameMaster())
+    if (pl->IsGameMaster())
         return true;
 
     if (GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INVISIBLE)
@@ -2571,7 +2568,7 @@ void Creature::SetInCombatWithZone(bool initialPulse)
     {
         if (Player* pPlayer = i->getSource())
         {
-            if (pPlayer->isGameMaster())
+            if (pPlayer->IsGameMaster())
                 continue;
 
             if (!initialPulse && pPlayer->isInCombat())
@@ -2613,7 +2610,7 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
     if (selectFlags & SELECT_FLAG_IN_LOS && !IsWithinLOSInMap(pTarget))
         return false;
 
-    if (selectFlags & SELECT_FLAG_PLAYER_NOT_GM && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->ToPlayer()->isGameMaster()))
+    if (selectFlags & SELECT_FLAG_PLAYER_NOT_GM && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget->ToPlayer()->IsGameMaster()))
         return false;
 
     if (selectFlags & SELECT_FLAG_PET && !pTarget->ToPet())
@@ -3158,7 +3155,7 @@ void Creature::ClearTemporaryFaction()
         return;
 
     m_temporaryFactionFlags = TEMPFACTION_NONE;
-    setFaction(GetCreatureInfo()->faction_A);
+    setFaction(GetCreatureInfo()->faction);
 }
 
 void Creature::SendAreaSpiritHealerQueryOpcode(Player *pl)

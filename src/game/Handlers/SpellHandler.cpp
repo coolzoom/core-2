@@ -314,9 +314,15 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         }
     }
 
+    // World of Warcraft Client Patch 1.10.0 (2006-03-28)
+    // - Stealth and Invisibility effects will now be canceled at the
+    //   beginning of an action(spellcast, ability use etc...), rather than
+    //   at the completion of the action.
+#if SUPPORTED_CLIENT_BUILD > CLIENT_BUILD_1_9_4
     // Remove invisibility except Gnomish Cloaking Device, since evidence suggests
     // it remains until cast finish
     _player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ON_CAST_SPELL, 4079);
+#endif
 
     // client provided targets
     SpellCastTargets targets;
@@ -366,7 +372,7 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     recvPacket >> spellId;
 
     // Buff MJ '.gm visible off'.
-    if (spellId == 16380 && !_player->isGMVisible())
+    if (spellId == 16380 && !_player->IsGMVisible())
         return;
 
     SpellEntry const *spellInfo = sSpellMgr.GetSpellEntry(spellId);
