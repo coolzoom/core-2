@@ -102,3 +102,5 @@ sql/migrations/*.py
 revision.h
 migrations_list.h
 Progression.h
+sql/migrations/20181225012451_world.sql
+sql/migrations/world_db_updates.sql
