@@ -383,12 +383,6 @@ Anticrash.Rearm.Timer = 60000
 #        Whether to give dishonorable kills to players who kill civilians.
 #        Default: 1
 #
-#    Progression.AccurateMountSkillTraining
-#        Whether to use Blizzlike mount skill training.
-#        Before 1.12, players had to acquire individual skills per mount type and the training was the
-#        cheap part. After 1.12, it was homogenized to a single skill.
-#        Default: 1
-#
 #    Progression.AccuratePetStatistics
 #        Whether to allow Blizzlike pet statistic (damage, speed, resists) progression.
 #        Default: 1
@@ -406,6 +400,12 @@ Anticrash.Rearm.Timer = 60000
 #        Whether to accurately portray changes in spell effects (eg. Deviate Fish). NOT applicable to effects
 #        which change their functionality (eg. spell changed) or values between patches. Only affects
 #        spells which had effects added or removed which still exist in the game client.
+#        Default: 1
+#
+#    Progression.RestoreDeletedItems
+#        Whether to automatically restore items which were previously deleted because no item template with
+#        this entry existed on that content patch. Players will receive the item in the mail once it has been
+#        added to the game.
 #        Default: 1
 #
 #    Progression.NoRespecPriceDecay
@@ -432,7 +432,7 @@ PvP.AccurateTimeline = 1
 PvP.AccurateRewards = 1
 PvP.DishonorableKills = 1
 
-Progression.AccurateMountSkillTraining = 1
+Progression.RestoreDeletedItems = 1
 Progression.AccuratePetStatistics = 1
 Progression.AccurateLFGAvailability = 1
 Progression.AccuratePVEEvents = 1

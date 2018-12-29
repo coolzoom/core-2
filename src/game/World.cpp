@@ -949,10 +949,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_SMARTLOG_SCRIPTINFO, "Smartlog.ScriptInfo", 1);
     setConfig(CONFIG_UINT32_LONGCOMBAT, "Smartlog.LongCombatDuration", 30 * MINUTE);
 
-
-    
     setConfig(CONFIG_UINT32_ITEM_INSTANTSAVE_QUALITY, "Item.InstantSave.Quality", ITEM_QUALITY_ARTIFACT);
-
 
     setConfig(CONFIG_UINT32_MAILSPAM_EXPIRE_SECS, "MailSpam.ExpireSecs", 0);
     setConfig(CONFIG_UINT32_MAILSPAM_MAX_MAILS, "MailSpam.MaxMails", 2);
@@ -985,13 +982,13 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_ENABLE_DK, "PvP.DishonorableKills", true);
 
     // Progression settings
-    setConfig(CONFIG_BOOL_ACCURATE_MOUNTS, "Progression.AccurateMountSkillTraining", true);
     setConfig(CONFIG_BOOL_ACCURATE_PETS, "Progression.AccuratePetStatistics", true);
     setConfig(CONFIG_BOOL_ACCURATE_LFG, "Progression.AccurateLFGAvailability", true);
     setConfig(CONFIG_BOOL_ACCURATE_PVE_EVENTS, "Progression.AccuratePVEEvents", true);
     setConfig(CONFIG_BOOL_ACCURATE_SPELL_EFFECTS, "Progression.AccurateSpellEffects", true);
     setConfig(CONFIG_BOOL_NO_RESPEC_PRICE_DECAY, "Progression.NoRespecPriceDecay", true);
     setConfig(CONFIG_BOOL_NO_QUEST_XP_TO_GOLD, "Progression.NoQuestXpToGold", true);
+    setConfig(CONFIG_BOOL_RESTORE_DELETED_ITEMS, "Progression.RestoreDeletedItems", true);
 
     setConfig(CONFIG_UINT32_CREATURE_SUMMON_LIMIT, "MaxCreatureSummonLimit", DEFAULT_CREATURE_SUMMON_LIMIT);
     m_creatureSummonCountLimit = getConfig(CONFIG_UINT32_CREATURE_SUMMON_LIMIT);
@@ -1632,8 +1629,11 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading spell group stack rules ...");
     sSpellMgr.LoadSpellGroupStackRules();
 
-    sLog.outString("Restoring deleted items to players ...");
-    sObjectMgr.RestoreDeletedItems();
+    if (getConfig(CONFIG_BOOL_RESTORE_DELETED_ITEMS))
+    {
+        sLog.outString("Restoring deleted items to players ...");
+        sObjectMgr.RestoreDeletedItems();
+    }
 
     sAutoTestingMgr->Load();
 
@@ -1917,17 +1917,7 @@ private:
         while (char* line = lineFromMessage(pos))
         {
             WorldPacket* data = new WorldPacket();
-
-            uint32 lineLength = (line ? strlen(line) : 0) + 1;
-
-            data->Initialize(SMSG_MESSAGECHAT, 100);                // guess size
-            *data << uint8(CHAT_MSG_SYSTEM);
-            *data << uint32(LANG_UNIVERSAL);
-            *data << uint64(0);
-            *data << uint32(lineLength);
-            *data << line;
-            *data << uint8(0);
-
+            ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, line);
             data_list.push_back(data);
         }
     }
@@ -2022,7 +2012,7 @@ void World::SendGlobalText(const char* text, WorldSession *self)
 
     while (char* line = ChatHandler::LineFromMessage(pos))
     {
-        ChatHandler::FillMessageData(&data, nullptr, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, line);
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line);
         SendGlobalMessage(&data, self);
     }
 
@@ -2049,7 +2039,7 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
 void World::SendZoneText(uint32 zone, const char* text, WorldSession *self, uint32 team)
 {
     WorldPacket data;
-    ChatHandler::FillMessageData(&data, nullptr, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, text);
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, text);
     SendZoneMessage(zone, &data, self, team);
 }
 
