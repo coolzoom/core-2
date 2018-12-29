@@ -59,7 +59,7 @@ enum ConditionType
                                                             // value2: if != 0 only consider players in range of this value
     CONDITION_ACTIVE_HOLIDAY        = 26,                   // holiday_id   0       preferred use instead CONDITION_ACTIVE_GAME_EVENT when possible
     CONDITION_GENDER                = 27,                   // 0=male, 1=female, 2=none (see enum Gender)
-    CONDITION_IS_PLAYER             = 28,                   // 0       
+    CONDITION_IS_PLAYER             = 28,                   // 0
     CONDITION_SKILL_BELOW           = 29,                   // skill_id     skill_value
                                                             // True if player has skill skill_id and skill less than (and not equal) skill_value (for skill_value > 1)
                                                             // If skill_value == 1, then true if player has not skill skill_id
@@ -153,7 +153,7 @@ class ConditionEntry
             return m_condition == CONDITION_TEAM ? Team(m_value1) : TEAM_CROSSFACTION;
         }
     private:
-        void DisableCondition() { m_condition = CONDITION_NONE; m_flags = CONDITION_FLAG_REVERSE_RESULT; }
+        void DisableCondition() { m_condition = CONDITION_NONE; m_flags ^= CONDITION_FLAG_REVERSE_RESULT; }
         bool CheckParamRequirements(WorldObject const* target, Map const* map, WorldObject const* source) const;
         bool inline Evaluate(WorldObject const* target, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
         uint32 m_entry;                                     // entry of the condition
