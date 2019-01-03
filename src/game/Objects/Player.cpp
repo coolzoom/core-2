@@ -17849,6 +17849,168 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     return crItem->maxcount != 0;
 }
 
+bool Player::ItemBuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot)
+{
+	// cheating attempt
+	if (count < 1) count = 1;
+
+	if (!isAlive())
+		return false;
+
+	ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(item);
+	if (!pProto)
+	{
+		SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+		return false;
+	}
+
+	Creature *pCreature = GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
+	if (!pCreature)
+	{
+		DEBUG_LOG("WORLD: BuyItemFromVendor - %s not found or you can't interact with him.", vendorGuid.GetString().c_str());
+		SendBuyError(BUY_ERR_DISTANCE_TOO_FAR, NULL, item, 0);
+		return false;
+	}
+
+	VendorItemData const* vItems = pCreature->GetVendorItems();
+	VendorItemData const* tItems = pCreature->GetVendorTemplateItems();
+	if ((!vItems || vItems->Empty()) && (!tItems || tItems->Empty()))
+	{
+		SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+		return false;
+	}
+
+	uint32 vCount = vItems ? vItems->GetItemCount() : 0;
+	uint32 tCount = tItems ? tItems->GetItemCount() : 0;
+
+	size_t vendorslot = vItems ? vItems->FindItemSlot(item) : vCount;
+	if (vendorslot > vCount)
+		vendorslot = vCount + (tItems ? tItems->FindItemSlot(item) : tCount);
+
+	if (vendorslot >= vCount + tCount)
+	{
+		SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+		return false;
+	}
+
+	VendorItem const* crItem = vendorslot < vCount ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - vCount);
+	if (!crItem || crItem->item != item)                    // store diff item (cheating)
+	{
+		SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+		return false;
+	}
+
+	uint32 totalCount = pProto->BuyCount * count;
+
+	// check current item amount if it limited
+	if (crItem->maxcount != 0)
+	{
+		if (pCreature->GetVendorItemCurrentCount(crItem) < totalCount)
+		{
+			SendBuyError(BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
+			return false;
+		}
+	}
+
+	uint32 reqFaction = pProto->RequiredReputationFaction;
+	if (!reqFaction && pProto->RequiredReputationRank > 0)
+		reqFaction = pCreature->getFactionTemplateEntry()->faction;
+
+	if (uint32(GetReputationRank(reqFaction)) < pProto->RequiredReputationRank)
+	{
+		SendBuyError(BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
+		return false;
+	}
+
+	auto playerRank = sWorld.getConfig(CONFIG_BOOL_ACCURATE_PVP_PURCHASE_REQUIREMENTS) ?
+		m_honorMgr.GetRank().rank : m_honorMgr.GetHighestRank().rank;
+
+	// not check level requiremnt for normal items (PvP related bonus items is another case)
+	if (pProto->RequiredHonorRank && (playerRank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel))
+	{
+		SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
+		return false;
+	}
+
+	uint32 price = pProto->BuyPrice * count;
+
+	// reputation discount
+	price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
+	uint32 CustomCurrencyItem = sConfig.GetIntDefault("CustomCurrencyItem", 999999);;
+
+	if (!HasItemCount(CustomCurrencyItem, price))
+	{
+		ItemPrototype const *RepProto = ObjectMgr::GetItemPrototype(CustomCurrencyItem);
+		ItemPrototype const *ItemProto = ObjectMgr::GetItemPrototype(item);
+		GetSession()->SendNotification(11017, ItemProto->Name1, RepProto->Name1, price);
+		//SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+		return false;
+	}
+
+	Item* pItem = NULL;
+
+	if ((bag == NULL_BAG && slot == NULL_SLOT) || IsInventoryPos(bag, slot))
+	{
+		ItemPosCountVec dest;
+		InventoryResult msg = CanStoreNewItem(bag, slot, dest, item, totalCount);
+		if (msg != EQUIP_ERR_OK)
+		{
+			SendEquipError(msg, NULL, NULL, item);
+			return false;
+		}
+
+		//LogModifyMoney(-int32(price), "BuyItem", vendorGuid, item);
+		DestroyItemCount(CustomCurrencyItem, price, true);
+
+		pItem = StoreNewItem(dest, item, true);
+	}
+	else if (IsEquipmentPos(bag, slot))
+	{
+		if (totalCount != 1)
+		{
+			SendEquipError(EQUIP_ERR_ITEM_CANT_BE_EQUIPPED, NULL, NULL);
+			return false;
+		}
+
+		uint16 dest;
+		InventoryResult msg = CanEquipNewItem(slot, dest, item, false);
+		if (msg != EQUIP_ERR_OK)
+		{
+			SendEquipError(msg, NULL, NULL, item);
+			return false;
+		}
+
+		//LogModifyMoney(-int32(price), "BuyItem", vendorGuid, item);
+		DestroyItemCount(CustomCurrencyItem, price, true);
+
+		pItem = EquipNewItem(dest, item, true);
+
+		if (pItem)
+			AutoUnequipOffhandIfNeed();
+	}
+	else
+	{
+		SendEquipError(EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, NULL, NULL);
+		return false;
+	}
+
+	if (!pItem)
+		return false;
+
+	uint32 new_count = pCreature->UpdateVendorItemCurrentCount(crItem, totalCount);
+
+	WorldPacket data(SMSG_BUY_ITEM, 8 + 4 + 4 + 4);
+	data << pCreature->GetObjectGuid();
+	data << uint32(vendorslot + 1);                 // numbered from 1 at client
+	data << uint32(crItem->maxcount > 0 ? new_count : 0xFFFFFFFF);
+	data << uint32(count);
+	GetSession()->SendPacket(&data);
+
+	SendNewItem(pItem, totalCount, true, false, false);
+
+	return crItem->maxcount != 0;
+}
+
 void Player::UpdateHomebindTime(uint32 time)
 {
     // GMs never get homebind timer online

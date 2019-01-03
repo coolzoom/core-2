@@ -1,0 +1,10 @@
+--- src/game/Objects/Player.h
++++ src/game/Objects/Player.h
+@@ -1200,6 +1200,7 @@ class MANGOS_DLL_SPEC Player final: public Unit
+             return mainItem && mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON;
+         }
+         void SendNewItem( Item *item, uint32 count, bool received, bool created, bool broadcast = false, bool showInChat = true );
++		bool ItemBuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot);
+         bool BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot);
+         void OnReceivedItem(Item* item);
+ 
