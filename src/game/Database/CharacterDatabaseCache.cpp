@@ -224,8 +224,7 @@ void CharacterDatabaseCache::LoadPetAura(uint32 singlePetId)
         uint32 uiFieldCount = 1;
 
         PetAuraCache _auraStruct;
-		//_auraStruct.caster_guid   = fields[1].GetUInt64();
-		_auraStruct.caster_guid = fields[uiFieldCount++].GetUInt64();
+        _auraStruct.caster_guid   = fields[1].GetUInt64();
         NEXT_UINT32(_auraStruct.item_guid);
         NEXT_UINT32(_auraStruct.spell);
         NEXT_UINT32(_auraStruct.stackcount);
