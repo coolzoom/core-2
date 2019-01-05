@@ -2116,4 +2116,6 @@ DynamicRespawn.PlayersMaxLevelDiff      = 0
 ###################################################################################################################
 
 Spells.CCDelay = 200
-
+CustomCurrencyVendorALLIANCE = 99998
+CustomCurrencyVendorHORDE = 99999
+CustomCurrencyItem = 41010
