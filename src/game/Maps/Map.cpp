@@ -1956,7 +1956,7 @@ void DungeonMap::InitVisibilityDistance()
 */
 bool DungeonMap::CanEnter(Player *player)
 {
-    if (player->GetMapRef().getTarget() == this)
+    if (player->GetMapRef().getTarget() == this && !player->shiftSpecCooldown())
     {
         sLog.outError("InstanceMap::CanEnter - player %s(%u) already in map %d,%d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId());
         MANGOS_ASSERT(false);

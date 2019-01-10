@@ -81,15 +81,16 @@ struct boss_kurinnaxxAI : public ScriptedAI
     {
         if (!m_pInstance)
             return;
-
+        
+         if (Creature* pOssirian = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_OSSIRIAN)))
         //tempsummon since ossirian is not created when this event occurs
-        if (Unit* pOssirian = m_creature->SummonCreature(NPC_OSSIRIAN,
+        /*if (Unit* pOssirian = m_creature->SummonCreature(NPC_OSSIRIAN,
                               m_creature->GetPositionX(),
                               m_creature->GetPositionY(),
-                              m_creature->GetPositionZ() - 40.0f,
+                              m_creature->GetPositionZ() - 0.0f,
                               0,
-                              TEMPSUMMON_TIMED_DESPAWN, 1000))
-            DoScriptText(SAY_BREACHED, pOssirian);
+                              TEMPSUMMON_TIMED_DESPAWN, 1000))*/
+            DoScriptText(SAY_BREACHED, pOssirian, NULL, CHAT_TYPE_ZONE_YELL);
 
         m_pInstance->SetData(TYPE_KURINNAXX, DONE);
     }

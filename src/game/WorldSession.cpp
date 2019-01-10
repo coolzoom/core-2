@@ -43,6 +43,10 @@
 
 #include "PlayerBotMgr.h"
 #include "Anticheat.h"
+// Warden
+#include "WardenWin.h"
+#include "WardenMac.h"
+
 #include "Language.h"
 #include "Auth/Sha1.h"
 #include "ChannelMgr.h"
@@ -351,7 +355,10 @@ bool WorldSession::Update(PacketFilter& updater)
             // Character stays IG for 2 minutes
             return ForcePlayerLogoutDelay();
         }
-
+        // Warden
+        if (m_Socket && GetPlayer() && m_warden)
+            m_warden->Update();
+        
         ///- If necessary, log the player out
         time_t currTime = time(nullptr);
         bool forceConnection = sPlayerBotMgr.ForceAccountConnection(this);
@@ -1115,7 +1122,16 @@ void WorldSession::SetDumpRecvPackets(const char* file)
 
 void WorldSession::InitWarden(BigNumber* K)
 {
-    m_warden = sAnticheatLib->CreateWardenFor(this, K);
+    if (GetOS() == CLIENT_OS_WIN && sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED))
+    {
+        m_warden = new WardenWin();
+        m_warden->Init(this, K);
+    }
+    else if (GetOS() == CLIENT_OS_MAC && sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED))
+    {
+        m_warden = new WardenMac();
+        m_warden->Init(this, K);
+    }
 }
 
 void WorldSession::ProcessAnticheatAction(const char* detector, const char* reason, uint32 cheatAction, uint32 banSeconds)

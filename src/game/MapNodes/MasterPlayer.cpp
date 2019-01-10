@@ -481,3 +481,122 @@ bool MasterPlayer::IsVisibleGloballyFor(MasterPlayer* viewer) const
 
     return true;
 }
+
+//dual spec
+
+ActionButtonList& MasterPlayer::GetSpecActionButtons(uint8 spec) 
+{
+	return m_specActionButtons[spec]; 
+}
+SpecTalentSet& MasterPlayer::GetSpecTalents(uint8 spec) 
+{
+	return m_specTalents[spec]; 
+}
+    
+void MasterPlayer::SaveAlternativeSpec()
+{
+	static SqlStatementID insertSpecAction;
+	static SqlStatementID deleteSpecAction;
+  static SqlStatementID insertSpecTalent;
+  static SqlStatementID deleteSpecTalent;
+//	sLog.outError("Saving spec");
+	//At first, save spells.
+	SqlStatement stmt = CharacterDatabase.CreateStatement(deleteSpecTalent, "Delete from character_altspec where guid = ?");
+	stmt.addUInt32(GetGUIDLow());
+	stmt.Execute();
+	
+	stmt = CharacterDatabase.CreateStatement(insertSpecTalent, "INSERT INTO character_altspec (guid, spellid, spec) VALUES (?, ?, ?)");
+	//Okay, now serialize it into string of ids, separated by whitespace
+	
+	for (SpecTalentSetMap::iterator itr = m_specTalents.begin(); itr != m_specTalents.end(); itr++)
+		if (itr->first <= 3)
+		{
+			SpecTalentSet& specTalentSet = m_specTalents[itr->first];
+	    for (SpecTalentSet::iterator it = specTalentSet.begin(); it != specTalentSet.end(); it++)
+	    {
+		    stmt.addUInt32(GetGUIDLow());
+        stmt.addUInt32(*it);
+        stmt.addUInt8(itr->first);
+        stmt.Execute();
+	    }
+	  }
+	
+//	sLog.outError("Spells saved");
+
+	//Now turn of action buttons
+	//Before - remove all player keys
+	stmt = CharacterDatabase.CreateStatement(deleteSpecAction, "DELETE FROM character_altspec_action WHERE guid = ?");
+	stmt.addUInt32(GetGUIDLow());
+	stmt.Execute();
+	// sLog.outError("Old buttons removed");
+
+	// //Now - seek all needed keys and insert into DB
+	for (SpecActionButtonsMap::iterator itr = m_specActionButtons.begin(); itr != m_specActionButtons.end(); itr++)
+	  if (itr->first <= 3)
+	  {
+	  	ActionButtonList& abl = m_specActionButtons[itr->first];
+	  	
+	    for (uint32 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+	    {
+	    	//Find button by button id
+	      ActionButtonList::const_iterator it = abl.find(button);
+	         //STL returns end() if not found. We need to skip it.
+        if (it != abl.end() && it->second.uState != ACTIONBUTTON_DELETED)
+	      {
+          //Okay, now we're ready to insert it
+          stmt = CharacterDatabase.CreateStatement(insertSpecAction, "INSERT INTO character_altspec_action (guid, button, action, type, spec) VALUES (?, ?, ?, ?, ?)");
+	        stmt.addUInt32(GetGUIDLow());
+	        stmt.addUInt32(button);
+	        stmt.addUInt32(it->second.GetAction());
+	        stmt.addUInt32(uint32(it->second.GetType()));
+	        stmt.addUInt8(itr->first);
+	        stmt.Execute();
+	      }
+	    }
+	  }
+	//All done
+}
+
+void MasterPlayer::LoadAlternativeSpecTalent(QueryResult *result)
+{
+	  m_specTalents.clear();
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 spell_id = fields[0].GetUInt32();
+            uint8  spec = fields[1].GetUInt8();
+            
+            if (spec <= 3)
+              m_specTalents[spec].insert(spell_id);
+        }
+        while (result->NextRow());
+    }
+}
+
+void MasterPlayer::LoadAlternativeSpecAction(QueryResult *result)
+{
+	  m_specActionButtons.clear();
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint8 button = fields[0].GetUInt8();
+            uint32 action = fields[1].GetUInt32();
+            uint8 type = fields[2].GetUInt8();
+            uint8 spec = fields[3].GetUInt8();
+            
+            if (spec <= 3)
+            {
+                ActionButtonList& abl = m_specActionButtons[spec];
+                ActionButton& ab = abl[button];
+                ab.SetActionAndType(action, ActionButtonType(type));
+            }
+        }
+        while (result->NextRow());
+    }
+}

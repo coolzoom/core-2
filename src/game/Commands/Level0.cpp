@@ -354,23 +354,35 @@ bool ChatHandler::HandleWhisperRestrictionCommand(char* args)
     return false;
 }
 
-//dual spec
-bool ChatHandler::HandleSwapSpec(char* /*args*/)
+bool ChatHandler::HandleWorldCast( char* args)
 {
-	uint32 res = m_session->GetPlayer()->SwapSpec();
-	switch (res) {
-	case 3: {
-		PSendSysMessage("Oh, wait a bit, please!");
-		break;
+	if (!*args)// (!*args || m_session->GetPlayer()->GetMoney() < 1000)
+		return false;
+
+	uint32 ChatCost = sWorld.getConfig(CONFIG_UINT32_WORLD_CHAT_COST);
+	if (m_session->GetPlayer()->GetMoney() < ChatCost)
+	{
+		m_session->GetPlayer()->GetSession()->SendNotification(LANG_NOT_ENOUGH_GOLD);
 	}
-	case 2: {
-		PSendSysMessage("Too low level");
-		break;
+	else 
+	{
+		MangosStrings lang = m_session->GetPlayer()->GetTeam() == ALLIANCE ? LANG_BG_ALLY : LANG_BG_HORDE;
+		sWorld.SendWorldText(11100, GetMangosString(lang), m_session->GetPlayerName(), args);
+		m_session->GetPlayer()->ModifyMoney(int32(0 - ChatCost));
+		m_session->GetPlayer()->GetSession()->SendNotification(11101, ChatCost);
 	}
-	case 1: {
-		PSendSysMessage("Swapped!");
-		break;
-	}
-	}
+	return true;
+}
+
+//dual spec
+
+bool ChatHandler::HandleSwapSpec(char* args)
+{
+	uint32 spec;
+	ExtractOptUInt32(&args, spec, 0);
+	
+	if (m_session->GetPlayer()->SwapSpec((uint8)spec))
+		PSendSysMessage(11103, (uint32)m_session->GetPlayer()->GetActiveSpec() + 1);
+	
 	return true;
 }

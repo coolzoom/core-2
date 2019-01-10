@@ -42,6 +42,8 @@ set (shared_SRCS
     Auth/HMACSHA1.h
     Auth/md5.h
     Auth/Sha1.h
+    Auth/ARC4.h
+    Auth/WardenKeyGeneration.h
     Config/Config.h
     Config/ConfigEnv.h
     Database/Database.h
@@ -78,6 +80,7 @@ set (shared_SRCS
     Auth/Hmac.cpp
     Auth/HMACSHA1.cpp
     Auth/Sha1.cpp
+    Auth/ARC4.cpp
     Config/Config.cpp
     Database/Database.cpp
     Database/DatabaseMysql.cpp
