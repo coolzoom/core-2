@@ -29,126 +29,127 @@
 #define TT_LEVELUP_CANCEL  90601
 
 // TELEPORT NPC
-  
+// TEXT
+#define TELEPORT_TEXT_MAJOR 32177            // "Major Cities"
+#define TELEPORT_TEXT_AZSHARA  7591          // "Azshara"
+#define TT_STARTING_AREA       90000          //"Starting Areas"
+#define TT_INSTANCES           90100          //"Instances" 
+#define TT_RAIDS               90200          //"Raids"
+#define TT_GURUBASHI           90300          //"Gurubashi Arena"
+#define TT_KALIMDOR            90400          //"Zones - Kalimdor"
+#define TT_EASTERN_KINGDOMS    90500          //"Zones - Eastern Kingdoms"
+
+
 bool GossipHello_TeleportNPC(Player *player, Creature *_Creature)   
 {
     // HORDE
     if (player->GetTeam() == HORDE)
     {
-        // player->ADD_GOSSIP_ITEM(5, "[GM 岛]"                  , GOSSIP_SENDER_MAIN, 74);
-		player->ADD_GOSSIP_ITEM(7, "[主城传送]"                  , GOSSIP_SENDER_MAIN, 1);
-		player->ADD_GOSSIP_ITEM(7, "[出生地点]"                  , GOSSIP_SENDER_MAIN, 3);
-		player->ADD_GOSSIP_ITEM(7, "[副本传送]"                  , GOSSIP_SENDER_MAIN, 5);
-		player->ADD_GOSSIP_ITEM(7, "[团队副本]"                  , GOSSIP_SENDER_MAIN, 101);
-		player->ADD_GOSSIP_ITEM(5, "[古拉巴什竞技场]"            , GOSSIP_SENDER_MAIN, 4015);
-		player->ADD_GOSSIP_ITEM(7, "[卡利姆多]"                  , GOSSIP_SENDER_MAIN, 6010);
-		player->ADD_GOSSIP_ITEM(7, "[东部王国]"                  , GOSSIP_SENDER_MAIN, 6020);
-		player->ADD_GOSSIP_ITEM(7, "[风景传送]", GOSSIP_SENDER_MAIN, 6030);
-		//player->ADD_GOSSIP_ITEM(7, "[飞行全开]", GOSSIP_SENDER_MAIN, 6040);
-		//player->ADD_GOSSIP_ITEM(7, "[拍卖行]", GOSSIP_SENDER_MAIN, 6050);
-		player->ADD_GOSSIP_ITEM(7, "[银行]", GOSSIP_SENDER_MAIN, 6060);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
+        // player->ADD_GOSSIP_ITEM(5, "PreTBC Mall"          , GOSSIP_SENDER_MAIN, 74);
+        //player->ADD_GOSSIP_ITEM(5, "Major Cities"               , GOSSIP_SENDER_MAIN, 1);
+        player->ADD_GOSSIP_ITEM(5, TT_STARTING_AREA       , GOSSIP_SENDER_MAIN, 3);
+        player->ADD_GOSSIP_ITEM(5, TT_INSTANCES           , GOSSIP_SENDER_MAIN, 5);
+        player->ADD_GOSSIP_ITEM(5, TT_RAIDS               , GOSSIP_SENDER_MAIN, 101);
+        player->ADD_GOSSIP_ITEM(5, TT_GURUBASHI           , GOSSIP_SENDER_MAIN, 4015);
+        player->ADD_GOSSIP_ITEM(5, TT_KALIMDOR            , GOSSIP_SENDER_MAIN, 6010);
+        player->ADD_GOSSIP_ITEM(5, TT_EASTERN_KINGDOMS    , GOSSIP_SENDER_MAIN, 6020);
+
     }
     // ALLIANCE
     else
     {
-        //player->ADD_GOSSIP_ITEM(5, "[GM 岛]"                   , GOSSIP_SENDER_MAIN, 74);
-		player->ADD_GOSSIP_ITEM(7, "[主城传送]"                  , GOSSIP_SENDER_MAIN, 2);
-		player->ADD_GOSSIP_ITEM(7, "[出生地点]"                  , GOSSIP_SENDER_MAIN, 4);
-		player->ADD_GOSSIP_ITEM(7, "[副本传送]"                  , GOSSIP_SENDER_MAIN, 5);
-		player->ADD_GOSSIP_ITEM(7, "[团队副本]"                  , GOSSIP_SENDER_MAIN, 101);
-		player->ADD_GOSSIP_ITEM(5, "[古拉巴什竞技场]"            , GOSSIP_SENDER_MAIN, 4015);
-		player->ADD_GOSSIP_ITEM(7, "[卡利姆多]"                  , GOSSIP_SENDER_MAIN, 6010);
-		player->ADD_GOSSIP_ITEM(7, "[东部王国]"                  , GOSSIP_SENDER_MAIN, 6020);
-		player->ADD_GOSSIP_ITEM(7, "[风景传送]", GOSSIP_SENDER_MAIN, 6030);
-		//player->ADD_GOSSIP_ITEM(7, "[飞行全开]", GOSSIP_SENDER_MAIN, 6040);
-		//player->ADD_GOSSIP_ITEM(7, "[拍卖行]", GOSSIP_SENDER_MAIN, 6050);
-		player->ADD_GOSSIP_ITEM(7, "[银行]", GOSSIP_SENDER_MAIN, 6060);
-
+        //player->ADD_GOSSIP_ITEM(5, "PreTBC Mall"          , GOSSIP_SENDER_MAIN, 74);
+        //player->ADD_GOSSIP_ITEM(5, "Major Cities"               , GOSSIP_SENDER_MAIN, 2);
+        player->ADD_GOSSIP_ITEM(5, TT_STARTING_AREA       , GOSSIP_SENDER_MAIN, 4);
+        player->ADD_GOSSIP_ITEM(5, TT_INSTANCES           , GOSSIP_SENDER_MAIN, 5);
+        player->ADD_GOSSIP_ITEM(5, TT_RAIDS               , GOSSIP_SENDER_MAIN, 101);
+        player->ADD_GOSSIP_ITEM(5, TT_GURUBASHI           , GOSSIP_SENDER_MAIN, 4015);
+        player->ADD_GOSSIP_ITEM(5, TT_KALIMDOR            , GOSSIP_SENDER_MAIN, 6010);
+        player->ADD_GOSSIP_ITEM(5, TT_EASTERN_KINGDOMS    , GOSSIP_SENDER_MAIN, 6020);
     }
-	
-	    // levelup
+    
+    // levelup
     if (player->getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-	    player->ADD_GOSSIP_ITEM(11, "升级"    , GOSSIP_SENDER_MAIN, 9);
+	    player->ADD_GOSSIP_ITEM(11, TT_LEVELUP    , GOSSIP_SENDER_MAIN, 9);
 	  
 	  // dual talent
 	  if (player->getLevel() > 10 && player->GetMaxSpec() < 1)
-	  	player->ADD_GOSSIP_ITEM(11, "双天赋"    , GOSSIP_SENDER_MAIN, 10);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
+	  	player->ADD_GOSSIP_ITEM(11, TT_DUALTALENT    , GOSSIP_SENDER_MAIN, 10);
+	  	
+	  player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
     return true;
 }
+
+#define TT_SHADOW_GRAVE               90001   //  "Shadow Grave"
+#define TT_VALLEY_TRIALS              90002   // Valley of Trials
+#define TT_CAMP_NARACHE               90003   // Camp Narache
+#define TT_NORTHSHIRE                 90005   // Northshire Valley
+#define TT_COLDRIDGE                  90006   // Coldridge Valley
+#define TT_SHADOWGLEN                 90007   // Shadowglen
+
 
 void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 action)
 {
     switch (action)
     {
         case 1: // Cities [HORDE]
-            player->ADD_GOSSIP_ITEM(5, "[奥格瑞玛]"              , GOSSIP_SENDER_MAIN, 20);
-            player->ADD_GOSSIP_ITEM(5, "[幽暗城]"                , GOSSIP_SENDER_MAIN, 21);
-            player->ADD_GOSSIP_ITEM(5, "[雷霆崖]"                , GOSSIP_SENDER_MAIN, 22);
-			//BL战场
-			player->ADD_GOSSIP_ITEM(5, "[奥特兰克战场]", GOSSIP_SENDER_MAIN, 26);
-			player->ADD_GOSSIP_ITEM(5, "[战歌峡谷]", GOSSIP_SENDER_MAIN, 27);
-			player->ADD_GOSSIP_ITEM(5, "[阿拉希战场]", GOSSIP_SENDER_MAIN, 28);
-
-			//player->ADD_GOSSIP_ITEM(5, "[剃刀岭]"                , GOSSIP_SENDER_MAIN, 4017);
-            player->ADD_GOSSIP_ITEM(0, "[返回]"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, "Orgrimmar"             , GOSSIP_SENDER_MAIN, 20);
+            player->ADD_GOSSIP_ITEM(5, "Undercity"             , GOSSIP_SENDER_MAIN, 21);
+            player->ADD_GOSSIP_ITEM(5, "Thunderbluff"          , GOSSIP_SENDER_MAIN, 22);
+            //player->ADD_GOSSIP_ITEM(5, "Goldshire (Stormwind)" , GOSSIP_SENDER_MAIN, 4018);
+            player->ADD_GOSSIP_ITEM(5, "<-[Main Menu]"                  , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
         case 2: // Cities [ALLIANCE]
-            player->ADD_GOSSIP_ITEM(5, "[暴风城]"                , GOSSIP_SENDER_MAIN, 23);
-            player->ADD_GOSSIP_ITEM(5, "[铁炉堡]"                , GOSSIP_SENDER_MAIN, 24);
-            player->ADD_GOSSIP_ITEM(5, "[达纳苏斯]"              , GOSSIP_SENDER_MAIN, 25);
-			//LM战场
-			player->ADD_GOSSIP_ITEM(5, "[奥特兰克战场]", GOSSIP_SENDER_MAIN, 29);
-			player->ADD_GOSSIP_ITEM(5, "[战歌峡谷]", GOSSIP_SENDER_MAIN, 30);
-			player->ADD_GOSSIP_ITEM(5, "[阿拉希战场]", GOSSIP_SENDER_MAIN, 31);
-			//player->ADD_GOSSIP_ITEM(5, "[闪金镇]"                , GOSSIP_SENDER_MAIN, 4018);
-			player->ADD_GOSSIP_ITEM(0, "[返回]"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, "Stormwind City"        , GOSSIP_SENDER_MAIN, 23);
+            player->ADD_GOSSIP_ITEM(5, "Ironforge"             , GOSSIP_SENDER_MAIN, 24);
+            player->ADD_GOSSIP_ITEM(5, "Darnassus"             , GOSSIP_SENDER_MAIN, 25);
+            //player->ADD_GOSSIP_ITEM(5, "Razor Hill(Orgrimmar)" , GOSSIP_SENDER_MAIN, 4017);
+            player->ADD_GOSSIP_ITEM(5, "<-[Main Menu]"                  , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
         case 3: // Starting Places [HORDE]
-            player->ADD_GOSSIP_ITEM(5, "[灰影墓穴]"              , GOSSIP_SENDER_MAIN, 40);
-            player->ADD_GOSSIP_ITEM(5, "[试炼谷]"                , GOSSIP_SENDER_MAIN, 41);
-            player->ADD_GOSSIP_ITEM(5, "[纳拉其营地]"            , GOSSIP_SENDER_MAIN, 42);
-			player->ADD_GOSSIP_ITEM(0, "[返回]"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, TT_SHADOW_GRAVE         , GOSSIP_SENDER_MAIN, 40);
+            player->ADD_GOSSIP_ITEM(5, TT_VALLEY_TRIALS        , GOSSIP_SENDER_MAIN, 41);
+            player->ADD_GOSSIP_ITEM(5, TT_CAMP_NARACHE         , GOSSIP_SENDER_MAIN, 42);
+            player->ADD_GOSSIP_ITEM(5, 90050                   , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
         case 4: // Starting Places [ALLIANCE]
-            player->ADD_GOSSIP_ITEM(5, "[北郡山谷]"              , GOSSIP_SENDER_MAIN, 43);
-            player->ADD_GOSSIP_ITEM(5, "[寒脊山谷]"              , GOSSIP_SENDER_MAIN, 44);
-            player->ADD_GOSSIP_ITEM(5, "[幽影谷]"                , GOSSIP_SENDER_MAIN, 45);
-			player->ADD_GOSSIP_ITEM(0, "[返回]"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, TT_NORTHSHIRE           , GOSSIP_SENDER_MAIN, 43);
+            player->ADD_GOSSIP_ITEM(5, TT_COLDRIDGE            , GOSSIP_SENDER_MAIN, 44);
+            player->ADD_GOSSIP_ITEM(5, TT_SHADOWGLEN           , GOSSIP_SENDER_MAIN, 45);
+            player->ADD_GOSSIP_ITEM(5, 90050         , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
         case 5: // Instances [PAGE 1]
-            player->ADD_GOSSIP_ITEM(5, "[哀嚎洞穴]"              , GOSSIP_SENDER_MAIN, 1249);
-            player->ADD_GOSSIP_ITEM(5, "[死亡矿井]"              , GOSSIP_SENDER_MAIN, 1250);
-            player->ADD_GOSSIP_ITEM(5, "[影牙城堡]"              , GOSSIP_SENDER_MAIN, 1251);
-            player->ADD_GOSSIP_ITEM(5, "[黑暗深渊]"              , GOSSIP_SENDER_MAIN, 1252);
-            player->ADD_GOSSIP_ITEM(5, "[剃刀沼泽]"              , GOSSIP_SENDER_MAIN, 1254);
-            player->ADD_GOSSIP_ITEM(5, "[剃刀高地]"              , GOSSIP_SENDER_MAIN, 1256);
-            player->ADD_GOSSIP_ITEM(5, "[血色修道院]"            , GOSSIP_SENDER_MAIN, 1257);
-			player->ADD_GOSSIP_ITEM(5, "[奥达曼]"                , GOSSIP_SENDER_MAIN, 1258);
-            player->ADD_GOSSIP_ITEM(7, "[下一页]"                , GOSSIP_SENDER_MAIN, 5551);
-            player->ADD_GOSSIP_ITEM(0, "[返回]"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, 90101 , GOSSIP_SENDER_MAIN, 1249);
+            player->ADD_GOSSIP_ITEM(5, 90102 , GOSSIP_SENDER_MAIN, 1250);
+            player->ADD_GOSSIP_ITEM(5, 90103 , GOSSIP_SENDER_MAIN, 1251);
+            player->ADD_GOSSIP_ITEM(5, 90104 , GOSSIP_SENDER_MAIN, 1252);
+            player->ADD_GOSSIP_ITEM(5, 90105 , GOSSIP_SENDER_MAIN, 1254);
+            player->ADD_GOSSIP_ITEM(5, 90106 , GOSSIP_SENDER_MAIN, 1256);
+            player->ADD_GOSSIP_ITEM(5, 90107 , GOSSIP_SENDER_MAIN, 1257);
+            player->ADD_GOSSIP_ITEM(7, 90051 , GOSSIP_SENDER_MAIN, 5551);
+            player->ADD_GOSSIP_ITEM(5, 90050 , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
+        
         case 9:
-        	  player->ADD_GOSSIP_ITEM(7, "确认升级" , GOSSIP_SENDER_MAIN, 7010);
-            player->ADD_GOSSIP_ITEM(5,  "取消" , GOSSIP_SENDER_MAIN, 100);
+        	  player->ADD_GOSSIP_ITEM(7, TT_LEVELUP_CONFIRM , GOSSIP_SENDER_MAIN, 7010);
+            player->ADD_GOSSIP_ITEM(5, TT_LEVELUP_CANCEL , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
             
         case 10:
-        	  player->ADD_GOSSIP_ITEM(7, "确认双天赋"  , GOSSIP_SENDER_MAIN, 7020);
-            player->ADD_GOSSIP_ITEM(5, "取消" , GOSSIP_SENDER_MAIN, 100);
+        	  player->ADD_GOSSIP_ITEM(7, TT_DUALTALENT_CONFIRM , GOSSIP_SENDER_MAIN, 7020);
+            player->ADD_GOSSIP_ITEM(5, TT_DUALTALENT_CANCEL , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
@@ -183,113 +184,89 @@ void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 act
         	  player->CLOSE_GOSSIP_MENU();
         	  break;
         }	
+        
         case 5551: // Instances [PAGE 2]
-            player->ADD_GOSSIP_ITEM(5, "[祖尔法拉克]"            , GOSSIP_SENDER_MAIN, 1259);
-            player->ADD_GOSSIP_ITEM(5, "[玛拉顿]"                , GOSSIP_SENDER_MAIN, 1260);
-            player->ADD_GOSSIP_ITEM(5, "[阿塔哈卡神庙]"          , GOSSIP_SENDER_MAIN, 1261);
-            player->ADD_GOSSIP_ITEM(5, "[黑石深渊]"              , GOSSIP_SENDER_MAIN, 1262);
-            player->ADD_GOSSIP_ITEM(5, "[厄运之槌]"              , GOSSIP_SENDER_MAIN, 1263);
-            player->ADD_GOSSIP_ITEM(5, "[斯坦索姆]"              , GOSSIP_SENDER_MAIN, 1265);
-            player->ADD_GOSSIP_ITEM(5, "[通灵学院]"              , GOSSIP_SENDER_MAIN, 1266);
-			player->ADD_GOSSIP_ITEM(5, "[黑石塔]"                , GOSSIP_SENDER_MAIN, 1264);
-            player->ADD_GOSSIP_ITEM(7, "[上一页]"                , GOSSIP_SENDER_MAIN, 5);
-            player->ADD_GOSSIP_ITEM(0, "[返回]"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, 90108 , GOSSIP_SENDER_MAIN, 1258);
+            player->ADD_GOSSIP_ITEM(5, 90109 , GOSSIP_SENDER_MAIN, 1259);
+            player->ADD_GOSSIP_ITEM(5, 90110 , GOSSIP_SENDER_MAIN, 1260);
+            player->ADD_GOSSIP_ITEM(5, 90111 , GOSSIP_SENDER_MAIN, 1261);
+            player->ADD_GOSSIP_ITEM(5, 90112 , GOSSIP_SENDER_MAIN, 1262);
+            player->ADD_GOSSIP_ITEM(5, 90113 , GOSSIP_SENDER_MAIN, 1263);
+            player->ADD_GOSSIP_ITEM(5, 90114 , GOSSIP_SENDER_MAIN, 1264);
+            player->ADD_GOSSIP_ITEM(5, 90115 , GOSSIP_SENDER_MAIN, 1265);
+            player->ADD_GOSSIP_ITEM(5, 90116 , GOSSIP_SENDER_MAIN, 1266);
+            player->ADD_GOSSIP_ITEM(7, 90052 , GOSSIP_SENDER_MAIN, 5);
+            player->ADD_GOSSIP_ITEM(5, 90050 , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
         case 101: // Raids
-            player->ADD_GOSSIP_ITEM(5, "[祖尔格拉布]"            , GOSSIP_SENDER_MAIN, 4000);
-            player->ADD_GOSSIP_ITEM(5, "[奥妮克希亚的巢穴]"      , GOSSIP_SENDER_MAIN, 4001);
-            player->ADD_GOSSIP_ITEM(5, "[熔火之心]"              , GOSSIP_SENDER_MAIN, 4002);
-            player->ADD_GOSSIP_ITEM(5, "[黑翼之巢]"              , GOSSIP_SENDER_MAIN, 4003);
-            player->ADD_GOSSIP_ITEM(5, "[安其拉废墟]"            , GOSSIP_SENDER_MAIN, 4004);
-            player->ADD_GOSSIP_ITEM(5, "[安其拉神庙]"            , GOSSIP_SENDER_MAIN, 4005);
-            player->ADD_GOSSIP_ITEM(5, "[纳克萨玛斯]"            , GOSSIP_SENDER_MAIN, 4006);
-			player->ADD_GOSSIP_ITEM(5, "[冰龙巢穴]"              , GOSSIP_SENDER_MAIN, 4007);
-            player->ADD_GOSSIP_ITEM(0, "[返回]"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, 90201 , GOSSIP_SENDER_MAIN, 4000);
+            player->ADD_GOSSIP_ITEM(5, 90202 , GOSSIP_SENDER_MAIN, 4001);
+            player->ADD_GOSSIP_ITEM(5, 90203 , GOSSIP_SENDER_MAIN, 4002);
+            player->ADD_GOSSIP_ITEM(5, 90204 , GOSSIP_SENDER_MAIN, 4003);
+            player->ADD_GOSSIP_ITEM(5, 90205 , GOSSIP_SENDER_MAIN, 4004);
+            player->ADD_GOSSIP_ITEM(5, 90206 , GOSSIP_SENDER_MAIN, 4005);
+            player->ADD_GOSSIP_ITEM(5, 90207 , GOSSIP_SENDER_MAIN, 4006);
+            player->ADD_GOSSIP_ITEM(5, 90050 , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
         case 6010: // Kalimdor
-            player->ADD_GOSSIP_ITEM(5, "[灰谷]"                  , GOSSIP_SENDER_MAIN, 601);
-            player->ADD_GOSSIP_ITEM(5, "[黑海岸]"                , GOSSIP_SENDER_MAIN, 602);
-            player->ADD_GOSSIP_ITEM(5, "[凄凉之地]"              , GOSSIP_SENDER_MAIN, 603);
-            player->ADD_GOSSIP_ITEM(5, "[杜隆塔尔]"              , GOSSIP_SENDER_MAIN, 604);
-            player->ADD_GOSSIP_ITEM(5, "[尘泥沼泽]"              , GOSSIP_SENDER_MAIN, 605);
-            player->ADD_GOSSIP_ITEM(5, "[菲拉斯]"                , GOSSIP_SENDER_MAIN, 606);
-            player->ADD_GOSSIP_ITEM(5, "[希利苏斯]"              , GOSSIP_SENDER_MAIN, 607);
-            player->ADD_GOSSIP_ITEM(5, "[石爪山脉]"              , GOSSIP_SENDER_MAIN, 608);
-            player->ADD_GOSSIP_ITEM(5, "[塔纳利斯]"              , GOSSIP_SENDER_MAIN, 609);
-            player->ADD_GOSSIP_ITEM(5, "[贫瘠之地]"              , GOSSIP_SENDER_MAIN, 610);
-            player->ADD_GOSSIP_ITEM(5, "[千针石林]"              , GOSSIP_SENDER_MAIN, 611);
-            player->ADD_GOSSIP_ITEM(5, "[冬泉谷]"                , GOSSIP_SENDER_MAIN, 612);
-            player->ADD_GOSSIP_ITEM(0, "[返回"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, 90401 , GOSSIP_SENDER_MAIN, 601);
+            player->ADD_GOSSIP_ITEM(5, 90402 , GOSSIP_SENDER_MAIN, 602);
+            player->ADD_GOSSIP_ITEM(5, 90403 , GOSSIP_SENDER_MAIN, 603);
+            player->ADD_GOSSIP_ITEM(5, 90404 , GOSSIP_SENDER_MAIN, 604);
+            player->ADD_GOSSIP_ITEM(5, 90405 , GOSSIP_SENDER_MAIN, 605);
+            player->ADD_GOSSIP_ITEM(5, 90406 , GOSSIP_SENDER_MAIN, 606);
+            player->ADD_GOSSIP_ITEM(5, 90407 , GOSSIP_SENDER_MAIN, 607);
+            player->ADD_GOSSIP_ITEM(5, 90408 , GOSSIP_SENDER_MAIN, 608);
+            player->ADD_GOSSIP_ITEM(5, 90409 , GOSSIP_SENDER_MAIN, 609);
+            player->ADD_GOSSIP_ITEM(5, 90410 , GOSSIP_SENDER_MAIN, 610);
+            player->ADD_GOSSIP_ITEM(5, 90411 , GOSSIP_SENDER_MAIN, 611);
+            player->ADD_GOSSIP_ITEM(5, 90412 , GOSSIP_SENDER_MAIN, 612);
+            player->ADD_GOSSIP_ITEM(7, 90051 , GOSSIP_SENDER_MAIN, 6022);
+            player->ADD_GOSSIP_ITEM(5, 90050 , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
         case 6020: // Eastern Kingdoms
-            player->ADD_GOSSIP_ITEM(5, "[阿拉希高地]"            , GOSSIP_SENDER_MAIN, 613);
-            player->ADD_GOSSIP_ITEM(5, "[荒芜之地]"              , GOSSIP_SENDER_MAIN, 614);
-            player->ADD_GOSSIP_ITEM(5, "[丹莫罗]"                , GOSSIP_SENDER_MAIN, 615);
-            player->ADD_GOSSIP_ITEM(5, "[暮色森林]"              , GOSSIP_SENDER_MAIN, 616);
-            player->ADD_GOSSIP_ITEM(5, "[东瘟疫之地]"            , GOSSIP_SENDER_MAIN, 617);
-            player->ADD_GOSSIP_ITEM(5, "[艾尔文森林]"            , GOSSIP_SENDER_MAIN, 618);
-            player->ADD_GOSSIP_ITEM(5, "[希尔斯布莱德丘陵]"      , GOSSIP_SENDER_MAIN, 619);
-            player->ADD_GOSSIP_ITEM(5, "[赤脊山]"                , GOSSIP_SENDER_MAIN, 620);
-            player->ADD_GOSSIP_ITEM(5, "[银松森林]"              , GOSSIP_SENDER_MAIN, 621);
-            player->ADD_GOSSIP_ITEM(5, "[荆棘谷]"                , GOSSIP_SENDER_MAIN, 622);
-            player->ADD_GOSSIP_ITEM(5, "[悲伤沼泽]"              , GOSSIP_SENDER_MAIN, 623);
-            player->ADD_GOSSIP_ITEM(5, "[辛特兰]"                , GOSSIP_SENDER_MAIN, 624);
-            player->ADD_GOSSIP_ITEM(5, "[提瑞斯法林地]"          , GOSSIP_SENDER_MAIN, 625);
-            player->ADD_GOSSIP_ITEM(5, "[西部荒野]"              , GOSSIP_SENDER_MAIN, 626);
-            player->ADD_GOSSIP_ITEM(5, "[湿地]"                  , GOSSIP_SENDER_MAIN, 627);
-            player->ADD_GOSSIP_ITEM(0, "[返回]"                  , GOSSIP_SENDER_MAIN, 100);
+            player->ADD_GOSSIP_ITEM(5, 90501 , GOSSIP_SENDER_MAIN, 613);
+            player->ADD_GOSSIP_ITEM(5, 90502 , GOSSIP_SENDER_MAIN, 614);
+            player->ADD_GOSSIP_ITEM(5, 90503 , GOSSIP_SENDER_MAIN, 615);
+            player->ADD_GOSSIP_ITEM(5, 90504 , GOSSIP_SENDER_MAIN, 616);
+            player->ADD_GOSSIP_ITEM(5, 90505 , GOSSIP_SENDER_MAIN, 617);
+            player->ADD_GOSSIP_ITEM(5, 90506 , GOSSIP_SENDER_MAIN, 618);
+            player->ADD_GOSSIP_ITEM(5, 90507 , GOSSIP_SENDER_MAIN, 619);
+            player->ADD_GOSSIP_ITEM(5, 90508 , GOSSIP_SENDER_MAIN, 620);
+            player->ADD_GOSSIP_ITEM(5, 90509 , GOSSIP_SENDER_MAIN, 621);
+            player->ADD_GOSSIP_ITEM(5, 90510 , GOSSIP_SENDER_MAIN, 622);
+            player->ADD_GOSSIP_ITEM(5, 90511 , GOSSIP_SENDER_MAIN, 623);
+            player->ADD_GOSSIP_ITEM(5, 90512 , GOSSIP_SENDER_MAIN, 624);
+            player->ADD_GOSSIP_ITEM(5, 90513 , GOSSIP_SENDER_MAIN, 625);
+            player->ADD_GOSSIP_ITEM(7, 90051 , GOSSIP_SENDER_MAIN, 6021);
+            player->ADD_GOSSIP_ITEM(5, 90050 , GOSSIP_SENDER_MAIN, 100);
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
 
-			
-		case 6030: // 風景傳送
-			player->ADD_GOSSIP_ITEM(0, " 海加尔山 ", GOSSIP_SENDER_MAIN, 628);
-			player->ADD_GOSSIP_ITEM(0, " 海山龙洞 ", GOSSIP_SENDER_MAIN, 646);
-			//player->ADD_GOSSIP_ITEM(0, " 翡翠圣地 ", GOSSIP_SENDER_MAIN, 629);
-			//player->ADD_GOSSIP_ITEM(0, " 时光之穴 ", GOSSIP_SENDER_MAIN, 630);
-			player->ADD_GOSSIP_ITEM(0, " 黑暗之门 ", GOSSIP_SENDER_MAIN, 631);
-			//player->ADD_GOSSIP_ITEM(0, " [双塔山]", GOSSIP_SENDER_MAIN, 632);
-			player->ADD_GOSSIP_ITEM(0, " 梦境之树 ", GOSSIP_SENDER_MAIN, 633);
-			//player->ADD_GOSSIP_ITEM(0, " [恐怖之岛]", GOSSIP_SENDER_MAIN, 634);
-			player->ADD_GOSSIP_ITEM(0, " 暴雪路障 ", GOSSIP_SENDER_MAIN, 635);
-			player->ADD_GOSSIP_ITEM(0, " 天涯海滩 ", GOSSIP_SENDER_MAIN, 636);
-			player->ADD_GOSSIP_ITEM(0, " 安戈洛环形山 ", GOSSIP_SENDER_MAIN, 637);
-			//player->ADD_GOSSIP_ITEM(0, " 比吉尔的飞艇残骸 ", GOSSIP_SENDER_MAIN, 638);
-			player->ADD_GOSSIP_ITEM(0, " 石堡瀑布", GOSSIP_SENDER_MAIN, 639);
-			player->ADD_GOSSIP_ITEM(0, " 一个很美的地方", GOSSIP_SENDER_MAIN, 640);
-			player->ADD_GOSSIP_ITEM(0, " 翡翠森林", GOSSIP_SENDER_MAIN, 641);
-			player->ADD_GOSSIP_ITEM(0, " 地铁海底", GOSSIP_SENDER_MAIN, 642);
-			player->ADD_GOSSIP_ITEM(0, " 旧铁炉堡", GOSSIP_SENDER_MAIN, 643);
-			player->ADD_GOSSIP_ITEM(0, " 巨石水坝", GOSSIP_SENDER_MAIN, 644);
-			player->ADD_GOSSIP_ITEM(0, " 迷宫探险", GOSSIP_SENDER_MAIN, 645);
-			player->ADD_GOSSIP_ITEM(0, " [返回]", GOSSIP_SENDER_MAIN, 100);
-			player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
-			
-			break;
-		//case 6040: //飞行全开
-		//	/*for (uint8 i = 0; i < 8; i++)
-		//	{
-		//		player->SetTaximask(i,0xFFFFFFFF);
-		//	}*/
-		//	player->SetTaxiCheater(true);
-		//	player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID()); 
-		//	break;
+       case 6021: // Eastern Kingdoms
+            player->ADD_GOSSIP_ITEM(5, 90514 , GOSSIP_SENDER_MAIN, 626);
+            player->ADD_GOSSIP_ITEM(5, 90515 , GOSSIP_SENDER_MAIN, 627);
+            player->ADD_GOSSIP_ITEM(7, 90052 , GOSSIP_SENDER_MAIN, 6020);
+            player->ADD_GOSSIP_ITEM(5, 90050 , GOSSIP_SENDER_MAIN, 100);
+            
+            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
+            break;
+        
+       case 6022: // Kalimdor
+         	  player->ADD_GOSSIP_ITEM(5, TELEPORT_TEXT_AZSHARA , GOSSIP_SENDER_MAIN, 628);
+         	  player->ADD_GOSSIP_ITEM(5, 90413 , GOSSIP_SENDER_MAIN, 629);   
+            player->ADD_GOSSIP_ITEM(7, 90052 , GOSSIP_SENDER_MAIN, 6010);
+            player->ADD_GOSSIP_ITEM(5, 90050 , GOSSIP_SENDER_MAIN, 100);
+            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
+            break;
 
-			
-		//case 6050:  // 拍賣行
-		//	player->SEND_AUCTIONLIST(_Creature->GetGUID(), _Creature);
-		//	break;
-			
-		case 6060://銀行
-			player->SEND_BANKERLIST(_Creature->GetGUID());
-			break;
 // ----### CITIES ###----
 
 // ### HORDE ###
@@ -306,7 +283,7 @@ void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 act
             player->CLOSE_GOSSIP_MENU();
             player->TeleportTo(1, -1272.703735f, 116.886490f, 131.016861f, 0.0f);
             break;
-// ----### CITIES ###----
+
 // ### ALLIANCE ###
 
         case 23: // Stormwind
@@ -321,40 +298,6 @@ void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 act
             player->CLOSE_GOSSIP_MENU();
             player->TeleportTo(1, 9962.712891f, 2280.142822f, 1341.394409f, 0.0f);
             break;
-
-// ----### 战场 ###----
-
-			// ### HORDE ###
-
-		case 26: // [部落]奧特蘭戰場
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(30, -1237.976318,321.319366, 60.7065730, 0);
-			break;
-		case 27: // [部落]戰歌峽穀
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(489, 1123.168823, 1462.474976, 315.564148, 3.464511, 0);
-			break;
-		case 28: // [部落]阿拉希戰場
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(529, 855.156128, 828.636108,57.707348, 2.812707, 0);
-			break;
-
-			// ### ALLIANCE ###
-
-		case 29: // [聯盟]奧特蘭戰場
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(30, 606.597351, 24.840078, 42.931183, 0);
-			break;
-		case 30: // [聯盟]戰歌峽穀
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(489, 1413.284302, 1412.571411, 345.538391, 0);
-			break;
-		case 31: // [聯盟]阿拉希戰場
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(529, 1169.572266, 1157.919312, 56.533646, 0);
-			break;
-
-
 
 // ----### STARTING PLACES ####----
 
@@ -552,10 +495,6 @@ void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 act
             player->CLOSE_GOSSIP_MENU();
             player->TeleportTo(533, 3005.87f, -3435.0f, 293.89f, 0.0f);
             break;
-        case 4007:// 冰龙巢穴
-            player->CLOSE_GOSSIP_MENU();
-            player->TeleportTo(533, 3498.27f, -5349.45f, 144.967f, 0.0f);
-            break;
         case 601: // Kalimdor -> Ashenvale
             player->CLOSE_GOSSIP_MENU();
             player->TeleportTo(1, 3469.43f, 847.62f, 6.36476f, 0.0f);
@@ -602,7 +541,7 @@ void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 act
             break;
         case 612: // Kalimdor -> Winterspring
             player->CLOSE_GOSSIP_MENU();
-            player->TeleportTo(1, 6107.62f, -4181.6f, 853.322f, 0.0f);
+            player->TeleportTo(1, 6107.116f, -4191.085f, 849.321f, 0.0f);
             break;
         case 613: // Eastern Kingdoms -> Arathi Highlands
             player->CLOSE_GOSSIP_MENU();
@@ -664,146 +603,47 @@ void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 act
             player->CLOSE_GOSSIP_MENU();
             player->TeleportTo(0, -4086.36f, -2610.95f, 47.0143f, 0.0f);
             break;
-
-			// 風景傳送
-		case 628:
-				//海加爾山 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, 4603.946777,-3879.250977, 944.183472, 1);
-				break;
-		case 629:
-				//翡翠聖地 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, 3968.264648, -1290.036011, 240.326889, 5.927989);
-				break;
-		case 630:
-				//時光之穴 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, -8173.930176, -4737.463867, 33.777351, 4.772119);
-				break;
-		case 631:
-				//黑暗之門 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(0, -11849.031250, -3201.170654, -28.885090, 3.280838);
-				break;
-		case 632:
-				//雙塔山 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, -3331.353271, 2225.728271, 30.987701, 6.267522);
-				break;
-		case 633:
-				//夢境之樹 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, -2914.756104, 1902.199341, 34.741035, 5.690404);
-				break;
-		case 634:
-				//恐怖之島 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, 4603.946777, -3879.250977, 944.183472, 1);
-				break;
-		case 635:
-				//暴雪建設公司路障 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, 5478.060059, -3730.850098, 1593.439941, 5.610376);
-				break;
-		case 636:
-				//天涯海灘 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, -9851.617188, -3608.474121, 8.939731, 2.513388);
-				break;
-		case 637:
-				//安戈洛環形山 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, -8562.096680, -2106.056641, 8.852538, 0.090425);
-				break;
-		case 638:
-				//比吉爾的飛艇殘骸 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(1, -4014.003418, -3768.186523, 42.123295, 5.220697);
-				break;
-		case 639:
-				//石堡瀑布 統一格式說明：(MapID, X, Y, Z, 0);
-				player->CLOSE_GOSSIP_MENU();
-				player->TeleportTo(0, -9481.493164, -3326.915283, 8.864347, 0.846896);
-		case 640:
-			//死亡矿井一个很美的地方 統一格式說明：(MapID, X, Y, Z, 0); .go -1749 471 0.85 36
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(36, -1749, 471, 0.85, 0.846896);
-				break;
-		case 641:
-			//翡翠森林 統一格式說明：(MapID, X, Y, Z, 0); .go -1749 471 0.85 36
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(169, 3105.41, 3096.78, 27.0032,  0.846896);
-			break;
-		case 642:
-			//地铁海底 統一格式說明：(MapID, X, Y, Z, 0); .go -1749 471 0.85 36
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(369, -79.3722, 1171.28, -122.208, 0.68);
-			break;
-		case 643:
-			//旧铁炉堡 統一格式說明：(MapID, X, Y, Z, 0); .go -1749 471 0.85 36
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(0, -4819, - 975, 464.7, 0.68);
-			break;
-		case 644:
-			//巨石水坝 統一格式說明：(MapID, X, Y, Z, 0); .go -1749 471 0.85 36
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(0, -4717.5, -3389.22, 322.53, 1.69);
-			break;
-		case 645:
-			//迷宫探险 統一格式說明：(MapID, X, Y, Z, 0); .go -1749 471 0.85 36
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(0, -7398.118164, 795.607544, 131.408005, 1.69);
-			break;
-		case 646:
-			//海山龙洞 統一格式說明：(MapID, X, Y, Z, 0); .go 4814.1 -1736.4 1157.33 1
-			player->CLOSE_GOSSIP_MENU();
-			player->TeleportTo(1, 4814.1, -1736.4, 1157.33, 5.31);
-			break;
+        case 628://Kalimdor -> Azshara
+        	  player->CLOSE_GOSSIP_MENU();
+            player->TeleportTo(1, 2847.14f, -7286.56f, 23.6153f, 0.0f);
+            break;
+        
+        case 629://Kalimdor -> Un'Goro
+        	  player->CLOSE_GOSSIP_MENU();
+            player->TeleportTo(1, -7434.56f, -1983.21f, -270.149f, 0.0f);
+            break;
+           
         case 100: // Main Menu
             // HORDE
             if (player->GetTeam() == HORDE)
             {
-                //player->ADD_GOSSIP_ITEM(5, "[GM 岛]"                , GOSSIP_SENDER_MAIN, 74);
-                player->ADD_GOSSIP_ITEM(7, "[主城传送]"               , GOSSIP_SENDER_MAIN, 1);
-                player->ADD_GOSSIP_ITEM(7, "[出生地点]"               , GOSSIP_SENDER_MAIN, 3);
-                player->ADD_GOSSIP_ITEM(7, "[副本传送]"               , GOSSIP_SENDER_MAIN, 5);
-                player->ADD_GOSSIP_ITEM(7, "[团队副本]"               , GOSSIP_SENDER_MAIN, 101);
-                player->ADD_GOSSIP_ITEM(5, "[古拉巴什竞技场]"         , GOSSIP_SENDER_MAIN, 4015);
-                player->ADD_GOSSIP_ITEM(7, "[卡利姆多]"               , GOSSIP_SENDER_MAIN, 6010);
-                player->ADD_GOSSIP_ITEM(7, "[东部王国]"               , GOSSIP_SENDER_MAIN, 6020);
-				player->ADD_GOSSIP_ITEM(7, "[风景传送]", GOSSIP_SENDER_MAIN, 6030);
-				//player->ADD_GOSSIP_ITEM(7, "[飞行全开]", GOSSIP_SENDER_MAIN, 6040);
-				//player->ADD_GOSSIP_ITEM(7, "[拍卖行]", GOSSIP_SENDER_MAIN, 6050);
-				player->ADD_GOSSIP_ITEM(7, "[银行]", GOSSIP_SENDER_MAIN, 6060);
-                player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
+                //player->ADD_GOSSIP_ITEM(5, "PreTBC Mall"          , GOSSIP_SENDER_MAIN, 74);
+                //player->ADD_GOSSIP_ITEM(5, "Major Cities"               , GOSSIP_SENDER_MAIN, 1);
+                player->ADD_GOSSIP_ITEM(5, TT_STARTING_AREA       , GOSSIP_SENDER_MAIN, 3);
+                player->ADD_GOSSIP_ITEM(5, TT_INSTANCES            , GOSSIP_SENDER_MAIN, 5);
+                player->ADD_GOSSIP_ITEM(5, TT_RAIDS                 , GOSSIP_SENDER_MAIN, 101);
+                player->ADD_GOSSIP_ITEM(5, TT_GURUBASHI , GOSSIP_SENDER_MAIN, 4015);
+                player->ADD_GOSSIP_ITEM(5, TT_KALIMDOR     , GOSSIP_SENDER_MAIN, 6010);
+                player->ADD_GOSSIP_ITEM(5, TT_EASTERN_KINGDOMS     , GOSSIP_SENDER_MAIN, 6020);
+
             }
             // ALLIANCE
             else
             {
                 //player->ADD_GOSSIP_ITEM(5, "PreTBC Mall"          , GOSSIP_SENDER_MAIN, 74);
-                player->ADD_GOSSIP_ITEM(7, "[主城传送]"               , GOSSIP_SENDER_MAIN, 2);
-                player->ADD_GOSSIP_ITEM(7, "[出生地点]"               , GOSSIP_SENDER_MAIN, 4);
-                player->ADD_GOSSIP_ITEM(7, "[副本传送]"               , GOSSIP_SENDER_MAIN, 5);
-                player->ADD_GOSSIP_ITEM(7, "[团队副本]"               , GOSSIP_SENDER_MAIN, 101);
-                player->ADD_GOSSIP_ITEM(5, "[古拉巴什竞技场]"         , GOSSIP_SENDER_MAIN, 4015);
-                player->ADD_GOSSIP_ITEM(7, "[卡利姆多]"               , GOSSIP_SENDER_MAIN, 6010);
-                player->ADD_GOSSIP_ITEM(7, "[东部王国]"               , GOSSIP_SENDER_MAIN, 6020);
-				player->ADD_GOSSIP_ITEM(7, "[风景传送]", GOSSIP_SENDER_MAIN, 6030);
-				//player->ADD_GOSSIP_ITEM(7, "[飞行全开]", GOSSIP_SENDER_MAIN, 6040);
-				//player->ADD_GOSSIP_ITEM(7, "[拍卖行]", GOSSIP_SENDER_MAIN, 6050);
-				player->ADD_GOSSIP_ITEM(7, "[银行]", GOSSIP_SENDER_MAIN, 6060);
-                player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
+                //player->ADD_GOSSIP_ITEM(5, "Major Cities"               , GOSSIP_SENDER_MAIN, 2);
+                player->ADD_GOSSIP_ITEM(5, TT_STARTING_AREA       , GOSSIP_SENDER_MAIN, 4);
+                player->ADD_GOSSIP_ITEM(5, TT_INSTANCES            , GOSSIP_SENDER_MAIN, 5);
+                player->ADD_GOSSIP_ITEM(5, TT_RAIDS                 , GOSSIP_SENDER_MAIN, 101);
+                player->ADD_GOSSIP_ITEM(5, TT_GURUBASHI , GOSSIP_SENDER_MAIN, 4015);
+                player->ADD_GOSSIP_ITEM(5, TT_KALIMDOR     , GOSSIP_SENDER_MAIN, 6010);
+                player->ADD_GOSSIP_ITEM(5, TT_EASTERN_KINGDOMS     , GOSSIP_SENDER_MAIN, 6020);
+
             }
-			
-    // levelup
-    if (player->getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-	    player->ADD_GOSSIP_ITEM(11, "升级"    , GOSSIP_SENDER_MAIN, 9);
-	  
-	  // dual talent
-	  if (player->getLevel() > 10 && player->GetMaxSpec() < 1)
-	  	player->ADD_GOSSIP_ITEM(11, "双天赋"    , GOSSIP_SENDER_MAIN, 10);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
+            
+            if (player->getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+	            player->ADD_GOSSIP_ITEM(11, TT_LEVELUP    , GOSSIP_SENDER_MAIN, 9);
+	          player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
     }
 }
@@ -1071,9 +911,9 @@ void LearnSkillRecipesHelper(Player *player, uint32 skill_id)
 {
     uint32 classmask = player->getClassMask();
 
-    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+    for (uint32 j = 0; j < sObjectMgr.GetMaxSkillLineAbilityId(); ++j)
     {
-        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+        SkillLineAbilityEntry const *skillLine = sObjectMgr.GetSkillLineAbility(j);
         if (!skillLine)
             continue;
 
@@ -1216,329 +1056,6 @@ bool GossipSelect_ProfessionNPC(Player* player, Creature* creature, uint32 sende
     player->CLOSE_GOSSIP_MENU();
     return true;
 }
-
-
-
-
-
-
-//transmog
-
-
-std::map<uint64, std::map<uint32, Item*> > Items; // Items[GUID][DISPLAY] = item
-
-char * GetSlotName(uint8 slot)
-{
-	switch (slot)
-	{
-	case EQUIPMENT_SLOT_HEAD: return "头部";
-	case EQUIPMENT_SLOT_SHOULDERS: return "肩部";
-	case EQUIPMENT_SLOT_BODY: return "衬衣";
-	case EQUIPMENT_SLOT_CHEST: return "胸甲";
-	case EQUIPMENT_SLOT_WAIST: return "腰带";
-	case EQUIPMENT_SLOT_LEGS: return "腿部";
-	case EQUIPMENT_SLOT_FEET: return "靴子";
-	case EQUIPMENT_SLOT_WRISTS: return "手腕";
-	case EQUIPMENT_SLOT_HANDS: return "双手";
-	case EQUIPMENT_SLOT_BACK: return "背部";
-	case EQUIPMENT_SLOT_MAINHAND: return "主手";
-	case EQUIPMENT_SLOT_OFFHAND: return "副手";
-	case EQUIPMENT_SLOT_RANGED: return "远程";
-	case EQUIPMENT_SLOT_TABARD: return "徽章";
-	default: return NULL;
-	}
-}
-typedef std::unordered_map<ObjectGuid, uint32> TransmogMapType;
-TransmogMapType transmogMap; // transmogMap[iGUID] = entry
-void UpdateItem(Player* player, Item* item)
-{
-	sLog.outError("custom.transmog", "TransmogDisplayVendorMgr::UpdateItem");
-
-	if (item->IsEquipped())
-	{
-		player->SetVisibleItemSlot(item->GetSlot(), item);
-		if (player->IsInWorld())
-			item->SendUpdateToPlayer(player);
-	}
-}
-void SetFakeEntry(Player* player, Item* item, uint32 entry)
-{
-	sLog.outError("custom.transmog", "TransmogDisplayVendorMgr::SetFakeEntry");
-
-	transmogMap[item->GetGUID()] = entry;
-	UpdateItem(player, item);
-}
-
-
-bool IsSuitable(Item* pItem, Item* OLD, Player* pPlayer)
-{
-	if (pPlayer->CanUseItem(pItem, false) == EQUIP_ERR_OK)
-	{
-
-		ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(pItem->GetEntry());
-		ItemPrototype const *oldProto = ObjectMgr::GetItemPrototype(OLD->GetEntry());
-		uint32 Quality = pProto->Quality;
-		if (Quality == ITEM_QUALITY_UNCOMMON || Quality == ITEM_QUALITY_RARE || Quality == ITEM_QUALITY_EPIC)
-		{
-			uint32 NClass = pProto->Class;
-			uint32 OClass = oldProto->Class;
-			uint32 NSubClass = pProto->SubClass;
-			uint32 OSubClass = oldProto->SubClass;
-			if (NClass == OClass) // not possibly the best structure here, but atleast I got my head around this
-				if (NClass == ITEM_CLASS_WEAPON)
-				{
-					if (NSubClass == OSubClass || ((NSubClass == ITEM_SUBCLASS_WEAPON_BOW || NSubClass == ITEM_SUBCLASS_WEAPON_GUN || NSubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW) && (OSubClass == ITEM_SUBCLASS_WEAPON_BOW || OSubClass == ITEM_SUBCLASS_WEAPON_GUN || OSubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW)))
-					{
-						return true;
-					}
-				}
-				else if (NClass == ITEM_CLASS_ARMOR)
-					if (NSubClass == OSubClass && pProto->InventoryType == oldProto->InventoryType)
-					{
-						return true;
-					}
-		}
-	}
-	return false;
-}
-std::string AreYouSure(uint8 slot, Item* pItem)
-{
-	ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(pItem->GetEntry());
-	std::string msg = "Transmogrify ";
-	msg += GetSlotName(slot);
-	msg += "\nTo ";
-	msg += pProto->Name1;
-	return msg;
-}
-bool GossipHello_TransmogNPC(Player* player, Creature* creature)
-{
-
-	player->PlayerTalkClass->ClearMenus();
-	for (uint8 Slot = EQUIPMENT_SLOT_START; Slot < EQUIPMENT_SLOT_END; Slot++) {
-		
-		
-
-		if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, Slot))
-		{
-			ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(pItem->GetEntry());
-			uint32 Quality = pProto->Quality;
-			//if (Quality == ITEM_QUALITY_UNCOMMON || Quality == ITEM_QUALITY_RARE || Quality == ITEM_QUALITY_EPIC) {
-				if (char* SlotName = GetSlotName(Slot))
-					player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, SlotName, EQUIPMENT_SLOT_END, Slot);
-			//}
-					
-		}
-	
-	}
-
-	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "退出..", EQUIPMENT_SLOT_END + 2, 0);
-	player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-	return true;
-
-
-
-}
-
-bool GossipSelect_TransmogNPC(Player* player, Creature* creature, uint32 sender, uint32 action)
-{
-	player->PlayerTalkClass->ClearMenus();
-	if (sender == EQUIPMENT_SLOT_END)
-	{
-		
-		
-		if (Item* OLD = player->GetItemByPos(INVENTORY_SLOT_BAG_0, action))
-		{
-			ItemPrototype const *oldProto = ObjectMgr::GetItemPrototype(OLD->GetEntry());
-			uint64 GUID = player->GetGUID();
-			Items[GUID].clear();
-			for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-				
-				if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i)) {
-					ItemPrototype const *newProto = ObjectMgr::GetItemPrototype(pItem->GetEntry());
-					if (IsSuitable(pItem, OLD, player))
-						if (Items[GUID].find(newProto->DisplayInfoID) == Items[GUID].end())
-							Items[GUID][newProto->DisplayInfoID] = pItem, player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, newProto->Name1, action, newProto->DisplayInfoID, AreYouSure(action, pItem), 0);
-				}
-			for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-				if (Bag* pBag = (Bag*)player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-					for (uint32 j = 0; j < pBag->GetBagSize(); j++)
-						if (Item* pItem = player->GetItemByPos(i, j)) {
-							ItemPrototype const *newProto = ObjectMgr::GetItemPrototype(pItem->GetEntry());
-							if (IsSuitable(pItem, OLD, player))
-								if (Items[GUID].find(newProto->DisplayInfoID) == Items[GUID].end())
-									Items[GUID][newProto->DisplayInfoID] = pItem, player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, newProto->Name1, action, newProto->DisplayInfoID, AreYouSure(action, pItem), 0);
-						}
-
-			if (Items[GUID].empty())
-			{
-				player->GetSession()->SendNotification("no suitable item in bag");
-				GossipHello_TransmogNPC(player, creature);
-				return true;
-			}
-			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Back..", EQUIPMENT_SLOT_END + 1, 0);
-			player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-		}
-		else
-			GossipHello_TransmogNPC(player, creature);
-	}
-	else if (sender == EQUIPMENT_SLOT_END + 1)
-		GossipHello_TransmogNPC(player, creature);
-	else if (sender == EQUIPMENT_SLOT_END + 2)
-		player->CLOSE_GOSSIP_MENU();
-	else
-	{
-		uint64 GUID = player->GetGUID();
-		Item* OLD = player->GetItemByPos(INVENTORY_SLOT_BAG_0, sender);
-		if (!OLD || Items[GUID].find(action) == Items[GUID].end() || !IsSuitable(Items[GUID][action], OLD, player))
-		{
-			player->GetSession()->SendNotification("no suitable item in slot");
-			return true;
-		}
-		else
-		{
-			Item* pItem = Items[GUID][action];
-			player->SetVisibleItemSlot(OLD->GetSlot(), pItem);
-			if (player->IsInWorld())
-				pItem->SendUpdateToPlayer(player);
-			//SetFakeEntry(player, OLD, Items[GUID][action]->GetEntry());
-			
-			player->GetSession()->SendAreaTriggerMessage("%s 幻化成功", GetSlotName(sender));
-
-		}
-		Items[GUID].clear();
-		GossipHello_TransmogNPC(player, creature);
-	}
-	return true;
-}
-
-////TOOL NPC
-//bool GossipHello_DemoNPC(Player* player, Creature* creature)
-//{
-//
-//	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "状态恢复", GOSSIP_SENDER_MAIN, 1);
-//	//player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[重置副本]", GOSSIP_SENDER_MAIN, 2);
-//	//player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[重置冷却]", GOSSIP_SENDER_MAIN, 3);
-//	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "Reset Combat", GOSSIP_SENDER_MAIN, 4);
-//	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[取消虚弱复活]", GOSSIP_SENDER_MAIN, 5);
-//	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[维修物品]", GOSSIP_SENDER_MAIN, 6);
-//	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[其它]", GOSSIP_SENDER_MAIN, 7);
-//	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "退出", GOSSIP_SENDER_MAIN, 8);
-//	player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-//	return true;
-//}
-//
-//bool GossipSelect_DemoNPC(Player* player, Creature* creature, uint32 sender, uint32 action)
-//{
-//	player->PlayerTalkClass->ClearMenus();
-//	switch (action)
-//	{
-//	case 1: // Restore HP and MP
-//		if (player->isInCombat())
-//		{
-//			//creature->MonsterWhisper("You're in combat!", player->GetGUID(), false);
-//			player->CLOSE_GOSSIP_MENU();
-//			return false;
-//		}
-//		else if (player->getPowerType() == POWER_MANA)
-//			player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
-//
-//		player->SetHealth(player->GetMaxHealth());
-//		player->CLOSE_GOSSIP_MENU();
-//		break;
-//	//case 2: // Reset Instances
-//	//	for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-//	//	{
-//	//		Player::BoundInstancesMap &binds = player->GetBoundInstances(Difficulty(i));
-//	//		for (Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end();)
-//	//		{
-//	//			player->UnbindInstance(itr, Difficulty(i));
-//	//		}
-//	//	}
-//	//	player->CLOSE_GOSSIP_MENU();
-//	//	break;
-//	//case 3: // Reset Cooldowns
-//	//	if (player->isInCombat())
-//	//	{
-//	//		creature->MonsterWhisper("You're in combat!", player->GetGUID(), false);
-//	//		player->CLOSE_GOSSIP_MENU();
-//	//		return false;
-//	//	}
-//
-//	//	player->RemoveAllSpellCooldown();
-//	//	player->CLOSE_GOSSIP_MENU();
-//	//	break;
-//	case 4: // Reset Combat
-//		player->CombatStop();
-//		player->CLOSE_GOSSIP_MENU();
-//		break;
-//	case 5: // Remove Sickness
-//		
-//		if (player->HasAura(15007)) {
-//			if (Aura* aura = player->GetAura(15007, EFFECT_INDEX_0))
-//				player->RemoveAura(aura);
-//		}
-//		player->CLOSE_GOSSIP_MENU();
-//		break;
-//	case 6: // Repair Items
-//		player->DurabilityRepairAll(false, 0);
-//		player->CLOSE_GOSSIP_MENU();
-//		break;
-//	case 7: // Others
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "重置天赋", GOSSIP_SENDER_MAIN, 71);
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "重置技能", GOSSIP_SENDER_MAIN, 72);
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "...返回", GOSSIP_SENDER_MAIN, 73);
-//		player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-//		break;
-//	case 8:
-//		player->CLOSE_GOSSIP_MENU();
-//		break;
-//	case 71: // Reset Talents
-//		player->resetTalents(true);
-//		/*player->SendTalentsInfoData(false);*/
-//		player->CLOSE_GOSSIP_MENU();
-//		break;
-//	case 72: // Reset Spells
-//		player->resetSpells();
-//		player->CLOSE_GOSSIP_MENU();
-//		break;
-//	case 73: // ...Back
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "状态恢复", GOSSIP_SENDER_MAIN, 1);
-//		//player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[重置副本]", GOSSIP_SENDER_MAIN, 2);
-//		//player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[重置冷却]", GOSSIP_SENDER_MAIN, 3);
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "Reset Combat", GOSSIP_SENDER_MAIN, 4);
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[取消虚弱复活]", GOSSIP_SENDER_MAIN, 5);
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[维修物品]", GOSSIP_SENDER_MAIN, 6);
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[其它]", GOSSIP_SENDER_MAIN, 7);
-//		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "退出", GOSSIP_SENDER_MAIN, 8);
-//		player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-//		break;
-//	}
-//	return true;
-//}
-
-
-
-//NPC DEMO
-bool GossipHello_DemoNPC(Player* player, Creature* creature)
-{
-
-
-	return true;
-
-
-
-}
-
-bool GossipSelect_DemoNPC(Player* player, Creature* creature, uint32 sender, uint32 action)
-{
-	
-	return true;
-}
-
-
-
-
-
 
 /*
 * Custom training dummy script
@@ -1684,12 +1201,6 @@ CreatureAI* GetAI_custom_summon_debug(Creature *creature)
 void AddSC_custom_creatures()
 {
     Script *newscript;
-
-	newscript = new Script;
-	newscript->Name = "custom_transmog_npc";
-	newscript->pGossipHello = &GossipHello_TransmogNPC;
-	newscript->pGossipSelect = &GossipSelect_TransmogNPC;
-	newscript->RegisterSelf(false);
 
     newscript = new Script;
     newscript->Name = "custom_teleport_npc";
