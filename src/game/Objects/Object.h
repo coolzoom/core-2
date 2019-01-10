@@ -421,7 +421,7 @@ class MANGOS_DLL_SPEC Object
         void SetGuidValue( uint16 index, ObjectGuid const& value ) { SetUInt64Value(index, value.GetRawValue()); }
         void SetStatFloatValue( uint16 index, float value);
         void SetStatInt32Value( uint16 index, int32 value);
-		void SendUpdateToPlayer(Player* player);//for transmog
+
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModPositiveFloatValue( uint16 index, float val, bool apply);

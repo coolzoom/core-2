@@ -150,7 +150,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
         return;
     }
     if (!m_Socket && !m_masterSession)
-    {
+    {   
         if (packet->GetOpcode() == SMSG_MESSAGECHAT)
         {
             WorldPacket packet2(*packet);
@@ -221,7 +221,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 
 #endif                                                  // !_DEBUG
 
-    //sLog.outString("[%s]Send packet : %u|0x%x (%s)", GetPlayerName(), packet->GetOpcode(), packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
+//    sLog.outString("[%s]Send packet : %u|0x%x (%s)", GetPlayerName(), packet->GetOpcode(), packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
     if (Player* player = GetPlayer())
         DEBUG_UNIT_IF(packet->GetOpcode() != SMSG_MESSAGECHAT && packet->GetOpcode() != SMSG_WARDEN_DATA, player,
             DEBUG_PACKETS_SEND, "[%s] Send packet : %u/0x%x (%s)", player->GetName(), packet->GetOpcode(), packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
@@ -1012,7 +1012,7 @@ void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* pac
         _player->SetCanDelayTeleport(true);
 
 
-    //sLog.outString("[%s] Recvd packet : %u/0x%x (%s)", GetUsername().c_str(), packet->GetOpcode(), packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
+//    sLog.outString("[%s] Recvd packet : %u/0x%x (%s)", GetUsername().c_str(), packet->GetOpcode(), packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
     if (Player* player = GetPlayer())
         DEBUG_UNIT(player, DEBUG_PACKETS_RECV, "[%s] Recvd packet : %u/0x%x (%s)", player->GetName(), packet->GetOpcode(), packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
     if (_pcktRecvDump)

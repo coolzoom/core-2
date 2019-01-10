@@ -2089,6 +2089,45 @@ bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1, uint32 spell
     return GetFirstSpellInChain(spellInfo_1->Id) == GetFirstSpellInChain(spellId_2);
 }
 
+bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const *spellInfo) const
+{
+    if (IsPassiveSpell(spellInfo))                          // ranked passive spell
+        return false;
+    if (spellInfo->powerType != POWER_MANA && spellInfo->powerType != POWER_HEALTH)
+        return false;
+    if (IsProfessionOrRidingSpell(spellInfo->Id))
+        return false;
+
+    if (IsSkillBonusSpell(spellInfo->Id))
+        return false;
+
+    // All stance spells. if any better way, change it.
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        switch (spellInfo->SpellFamilyName)
+        {
+            case SPELLFAMILY_PALADIN:
+                // Paladin aura Spell
+                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY)
+                    return false;
+                break;
+            case SPELLFAMILY_DRUID:
+                // Druid form Spell
+                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
+                        spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
+                    return false;
+                break;
+            case SPELLFAMILY_ROGUE:
+                // Rogue Stealth
+                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
+                        spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
+                    return false;
+                break;
+        }
+    }
+    return true;
+}
+
 bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) const
 {
     SpellGroup unused;
@@ -2516,7 +2555,7 @@ bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 
 bool SpellMgr::IsSkillBonusSpell(uint32 spellId) const
 {
-    SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBoundsBySpellId(spellId);
+    SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBounds(spellId);
 
     for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
     {
@@ -2686,7 +2725,7 @@ void SpellMgr::LoadSpellChains()
     {
         // we can calculate ranks only after full data generation
         AbilitySpellPrevMap prevRanks;
-        for (SkillLineAbilityMap::const_iterator ab_itr = mSkillLineAbilityMapBySpellId.begin(); ab_itr != mSkillLineAbilityMapBySpellId.end(); ++ab_itr)
+        for (SkillLineAbilityMap::const_iterator ab_itr = mSkillLineAbilityMap.begin(); ab_itr != mSkillLineAbilityMap.end(); ++ab_itr)
         {
             uint32 spell_id = ab_itr->first;
 
@@ -2715,7 +2754,7 @@ void SpellMgr::LoadSpellChains()
                 continue;
 
             // some forward spells still exist but excluded from real use as ranks and not listed in skill abilities now
-            SkillLineAbilityMapBounds bounds = mSkillLineAbilityMapBySpellId.equal_range(forward_id);
+            SkillLineAbilityMapBounds bounds = mSkillLineAbilityMap.equal_range(forward_id);
             if (bounds.first == bounds.second)
                 continue;
 
@@ -3843,28 +3882,26 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
     return GetSpellAllowedInLocationError(spellInfo, nullptr /* zone/area already checked */, player);
 }
 
-void SpellMgr::LoadSkillLineAbilityMaps()
+void SpellMgr::LoadSkillLineAbilityMap()
 {
-    mSkillLineAbilityMapBySpellId.clear();
-    mSkillLineAbilityMapBySkillId.clear();
+    mSkillLineAbilityMap.clear();
 
-    const uint32 rows = sObjectMgr.GetMaxSkillLineAbilityId();
+    BarGoLink bar(sObjectMgr.GetMaxSkillLineAbilityId());
     uint32 count = 0;
 
-    BarGoLink bar(rows);
-    for (uint32 row = 0; row < rows; ++row)
+    for (uint32 i = 0; i < sObjectMgr.GetMaxSkillLineAbilityId(); ++i)
     {
         bar.step();
-        if (SkillLineAbilityEntry const* entry = sObjectMgr.GetSkillLineAbility(row))
-        {
-            mSkillLineAbilityMapBySpellId.insert(SkillLineAbilityMap::value_type(entry->spellId, entry));
-            mSkillLineAbilityMapBySkillId.insert(SkillLineAbilityMap::value_type(entry->skillId, entry));
-            ++count;
-        }
+        SkillLineAbilityEntry const *SkillInfo = sObjectMgr.GetSkillLineAbility(i);
+        if (!SkillInfo)
+            continue;
+
+        mSkillLineAbilityMap.insert(SkillLineAbilityMap::value_type(SkillInfo->spellId, SkillInfo));
+        ++count;
     }
 
     sLog.outString();
-    sLog.outString(">> Loaded %u SkillLineAbility MultiMaps Data", count);
+    sLog.outString(">> Loaded %u SkillLineAbility MultiMap Data", count);
 }
 
 void SpellMgr::LoadSkillRaceClassInfoMap()

@@ -372,7 +372,7 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket & /*recv_data*/)
     SendPacket(&data);
 
     // not remove flags if can't free move - its not set in Logout request code.
-    if (GetPlayer()->CanFreeMove()  && !GetPlayer()->shiftSpecCooldown())
+    if (GetPlayer()->CanFreeMove() && !GetPlayer()->shiftSpecCooldown())
     {
         //!we can move again
         GetPlayer()->SetMovement(MOVE_UNROOT);
@@ -1266,6 +1266,7 @@ void WorldSession::HandleRequestPetInfoOpcode(WorldPacket & /*recv_data */)
         _player->CharmSpellInitialize();
 }
 
+/*
 void WorldSession::HandleWardenDataOpcode(WorldPacket & recv_data)
 {
     if (!m_warden)
@@ -1276,3 +1277,4 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket & recv_data)
 
     m_warden->HandleWardenDataOpcode(recv_data);
 }
+*/

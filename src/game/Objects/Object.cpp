@@ -893,17 +893,7 @@ void Object::SetUInt32Value(uint16 index, uint32 value)
         MarkForClientUpdate();
     }
 }
-//for transmog
-void Object::SendUpdateToPlayer(Player* player)
-{
-	// send create update to player
-	UpdateData upd;
-	WorldPacket packet;
 
-	BuildCreateUpdateBlockForPlayer(&upd, player);
-	upd.BuildPacket(&packet);
-	player->GetSession()->SendPacket(&packet);
-}
 void Object::SetUInt64Value(uint16 index, const uint64 &value)
 {
     MANGOS_ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, true));

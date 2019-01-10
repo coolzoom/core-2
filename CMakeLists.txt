@@ -145,13 +145,13 @@ unset(ACE_LIBRARIES_DIR CACHE)
 unset(ACE_INCLUDE_DIR)
 unset(ACE_LIBRARIES)
 unset(ACE_LIBRARIES_DIR)
-
-find_package(ACE)
-if(NOT ACE_FOUND)
-  message(FATAL_ERROR
-    "This project requires ACE installed. Please download the ACE Micro Release Kit from http://download.dre.vanderbilt.edu/ and install it. If this script didn't find ACE and it was correctly installed please set ACE_ROOT to the correct path."
-  )
-endif()
+include(cmake/ImportACE.cmake)
+#find_package(ACE)
+#if(NOT ACE_FOUND)
+#  message(FATAL_ERROR
+#    "This project requires ACE installed. Please download the ACE Micro Release Kit from http://download.dre.vanderbilt.edu/ and install it. If this script didn't find ACE and it was correctly installed please set ACE_ROOT to the correct path."
+#  )
+#endif()
 
 if(NOT USE_STD_MALLOC)
   unset(TBB_INCLUDE_DIRS            CACHE)
@@ -337,7 +337,7 @@ if(UNIX)
     #set(BUILD_ADDITIONAL_FLAGS "${BUILD_ADDITIONAL_FLAGS} -fsanitize=unsigned-integer-overflow")
   endif()
 
-  set(BUILD_ADDITIONAL_FLAGS "${BUILD_ADDITIONAL_FLAGS} -std=c++14 --no-warnings -fexceptions -fnon-call-exceptions -march=native -O3 -pipe ")
+  set(BUILD_ADDITIONAL_FLAGS "${BUILD_ADDITIONAL_FLAGS} -std=c++11 --no-warnings -fexceptions -fnon-call-exceptions -march=native -pipe ")
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(PROFILE_GENERATE)
       set(BUILD_ADDITIONAL_FLAGS "${BUILD_ADDITIONAL_FLAGS} -fprofile-generate")
@@ -352,10 +352,10 @@ if(UNIX)
     endif()
   endif()
 
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${BUILD_ADDITIONAL_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BUILD_ADDITIONAL_FLAGS}")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${BUILD_ADDITIONAL_FLAGS}")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${BUILD_ADDITIONAL_FLAGS}")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${BUILD_ADDITIONAL_FLAGS} -O3")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BUILD_ADDITIONAL_FLAGS} -O3")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${BUILD_ADDITIONAL_FLAGS} -O0")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${BUILD_ADDITIONAL_FLAGS} -O0")
 elseif(WIN32)
   # Disable warnings in Visual Studio 8 and above and add /MP
   if(MSVC AND NOT CMAKE_GENERATOR MATCHES "Visual Studio 7")

@@ -30,7 +30,6 @@
 #include "UpdateData.h"
 #include "Chat.h"
 #include "Anticheat.h"
-#include "Config/Config.h"
 
 void WorldSession::HandleSplitItemOpcode(WorldPacket & recv_data)
 {
@@ -719,21 +718,7 @@ void WorldSession::HandleBuyItemInSlotOpcode(WorldPacket & recv_data)
     if (bag == NULL_BAG)
         return;
 
-	Creature *unit = _player->GetMap()->GetAnyTypeCreature(vendorGuid);
-	uint32 CustomCurrencyVendorALLIANCE = sConfig.GetIntDefault("CustomCurrencyVendorALLIANCE", 99998);
-	uint32 CustomCurrencyVendorHORDE = sConfig.GetIntDefault("CustomCurrencyVendorHORDE", 99999);
-	if (unit && unit->GetEntry() == CustomCurrencyVendorALLIANCE) //ALLIANCE
-	{
-		GetPlayer()->ItemBuyItemFromVendor(vendorGuid, item, count, bag, bagslot);
-	}
-	else if (unit && unit->GetEntry() == CustomCurrencyVendorHORDE) //HORDE
-	{
-		GetPlayer()->ItemBuyItemFromVendor(vendorGuid, item, count, bag, bagslot);
-	}
-	else
-	{
-		GetPlayer()->BuyItemFromVendor(vendorGuid, item, count, bag, bagslot);
-	}
+    GetPlayer()->BuyItemFromVendor(vendorGuid, item, count, bag, bagslot);
 }
 
 void WorldSession::HandleBuyItemOpcode(WorldPacket & recv_data)
@@ -745,21 +730,7 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket & recv_data)
 
     recv_data >> vendorGuid >> item >> count >> unk1;
 
-	Creature *unit = _player->GetMap()->GetAnyTypeCreature(vendorGuid);
-	uint32 CustomCurrencyVendorALLIANCE = sConfig.GetIntDefault("CustomCurrencyVendorALLIANCE", 99998);
-	uint32 CustomCurrencyVendorHORDE = sConfig.GetIntDefault("CustomCurrencyVendorHORDE", 99999);
-	if (unit && unit->GetEntry() == CustomCurrencyVendorALLIANCE)
-	{
-		GetPlayer()->ItemBuyItemFromVendor(vendorGuid, item, count, NULL_BAG, NULL_SLOT);
-	}
-	else if (unit && unit->GetEntry() == CustomCurrencyVendorHORDE)
-	{
-		GetPlayer()->ItemBuyItemFromVendor(vendorGuid, item, count, NULL_BAG, NULL_SLOT);
-	}
-	else
-	{
-		GetPlayer()->BuyItemFromVendor(vendorGuid, item, count, NULL_BAG, NULL_SLOT);
-	}
+    GetPlayer()->BuyItemFromVendor(vendorGuid, item, count, NULL_BAG, NULL_SLOT);
 }
 
 void WorldSession::HandleListInventoryOpcode(WorldPacket & recv_data)

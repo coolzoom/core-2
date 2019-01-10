@@ -889,15 +889,17 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleWaterwalkCommand(char* args);
         bool HandleQuitCommand(char* args);
 
-		bool HandleWorldCast(char* args);
+        bool HandleWorldCast(char* args);
+        
+        //dual spec
+		    bool HandleSwapSpec( char* args);
+		
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
         bool HandleDebugMoveCommand(char* args);
 
         //#INFO: Giperion was here
         bool HandleDebugShowNearestGOInfo(char* args);
-		//dual spec
-		bool HandleSwapSpec(char* args);
 
         Player*   GetSelectedPlayer();
         Creature* GetSelectedCreature();
