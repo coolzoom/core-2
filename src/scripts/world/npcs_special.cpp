@@ -2061,8 +2061,6 @@ struct npc_target_dummyAI : ScriptedAI
         m_bActive = true;
         m_uiStayTime = TARGET_DUMMY_DURATION;
         SetCombatMovement(false);
-        m_creature->GetMotionMaster()->Clear(false, true);
-        m_creature->GetMotionMaster()->MoveIdle();
 
         switch (m_creature->GetEntry())
         {
@@ -2088,27 +2086,17 @@ struct npc_target_dummyAI : ScriptedAI
         }
 
         m_creature->AddAura(m_passiveSpell, ADD_AURA_PERMANENT);
-        m_creature->CastSpell(m_creature, m_spawnEffect, false);
+        DoCastSpellIfCan(m_creature, m_spawnEffect, false);
     }
 
     void Reset() override
     {
-        SetCombatMovement(false);
+        
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
 
-    }
-
-    void AttackStart(Unit* /*pWho*/) override
-    {
-
-    }
-
-    void EnterEvadeMode() override
-    {
-        
     }
 
     void UpdateAI(const uint32 diff) override
@@ -2126,6 +2114,9 @@ struct npc_target_dummyAI : ScriptedAI
         }
         else
             m_uiStayTime -= diff;
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
     }
 };
 

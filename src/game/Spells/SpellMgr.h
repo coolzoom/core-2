@@ -1230,18 +1230,10 @@ class SpellMgr
         bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2) const;
         bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) const;
         bool CanAurasStack(SpellEntry const *spellInfo_1, SpellEntry const *spellInfo_2, bool sameCaster) const;
-        uint32 GetSpellBookSuccessorSpellId(uint32 spellId)
+        bool canStackSpellRanksInSpellBook(SpellEntry const *spellInfo) const;
+        bool IsRankedSpellNonStackableInSpellBook(SpellEntry const *spellInfo) const
         {
-            SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBoundsBySpellId(spellId);
-            for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
-            {
-                if (SkillLineAbilityEntry const* pAbility = itr->second)
-                {
-                    if (pAbility->forward_spellid)
-                        return pAbility->forward_spellid;
-                }
-            }
-            return 0;
+            return !canStackSpellRanksInSpellBook(spellInfo) && GetSpellRank(spellInfo->Id) != 0;
         }
 
         SpellEntry const* SelectAuraRankForLevel(SpellEntry const* spellInfo, uint32 Level) const;
@@ -1292,15 +1284,10 @@ class SpellMgr
         // Spell correctness for client using
         static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL, bool msg = true);
 
-        SkillLineAbilityMapBounds GetSkillLineAbilityMapBoundsBySpellId(uint32 spellId) const
+        SkillLineAbilityMapBounds GetSkillLineAbilityMapBounds(uint32 spell_id) const
         {
-            return mSkillLineAbilityMapBySpellId.equal_range(spellId);
+            return mSkillLineAbilityMap.equal_range(spell_id);
         }
-
-        SkillLineAbilityMapBounds GetSkillLineAbilityMapBoundsBySkillId(uint32 skillId) const
-        {
-            return mSkillLineAbilityMapBySkillId.equal_range(skillId);
-}
 
         SkillRaceClassInfoMapBounds GetSkillRaceClassInfoMapBounds(uint32 skill_id) const
         {
@@ -1367,7 +1354,7 @@ class SpellMgr
         void LoadSpellBonuses();
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
-        void LoadSkillLineAbilityMaps();
+        void LoadSkillLineAbilityMap();
         void LoadSkillRaceClassInfoMap();
         void LoadSpellPetAuras();
         void LoadSpellAreas();
@@ -1414,8 +1401,7 @@ class SpellMgr
         SpellProcItemEnchantMap mSpellProcItemEnchantMap;
         SpellEnchantChargesMap mSpellEnchantChargesMap;
         SpellBonusMap      mSpellBonusMap;
-        SkillLineAbilityMap mSkillLineAbilityMapBySpellId;
-        SkillLineAbilityMap mSkillLineAbilityMapBySkillId;
+        SkillLineAbilityMap mSkillLineAbilityMap;
         SkillRaceClassInfoMap mSkillRaceClassInfoMap;
         SpellPetAuraMap     mSpellPetAuraMap;
         SpellAreaMap         mSpellAreaMap;
