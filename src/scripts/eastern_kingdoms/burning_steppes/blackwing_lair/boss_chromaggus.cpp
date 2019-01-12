@@ -356,10 +356,8 @@ struct boss_chromaggusAI : public ScriptedAI
             for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
                 if (Player* target = m_creature->GetMap()->GetPlayer((*itr)->getUnitGuid()))
                     m_vPossibleVictim.push_back(target->GetObjectGuid());
-            
-            int nplayers = m_creature->GetMap()->GetPlayers().getSize();
-            nplayers = nplayers > 0? nplayers : 1;
-            int affli_rand = urand(0, 9 * (nplayers - 1) / 20 + 1);
+
+            int affli_rand = urand(0, 18);
             for (int i = 0; i < affli_rand; ++i)
             {
                 if (m_vPossibleVictim.empty())

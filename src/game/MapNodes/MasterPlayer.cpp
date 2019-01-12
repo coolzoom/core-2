@@ -57,7 +57,6 @@ void MasterPlayer::SaveToDB()
 {
     CharacterDatabase.BeginTransaction(GetGUIDLow());
     SaveActions();
-    SaveAlternativeSpec();
     SaveMails();
     CharacterDatabase.CommitTransaction();
 }

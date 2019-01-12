@@ -8,6 +8,7 @@
 
 class PlayerSocial;
 class WorldSession;
+struct ActionButton;
 class QueryResult;
 class Player;
 struct Mail;
