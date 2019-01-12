@@ -1047,8 +1047,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { NODE, "aura",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuraCommand,                "", nullptr },
         { NODE, "unaura",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnAuraCommand,              "", nullptr },
         { NODE, "announce",       SEC_MODERATOR,      true,  &ChatHandler::HandleAnnounceCommand,            "", nullptr },
-        { NODE, "sj",             SEC_PLAYER,         true,  &ChatHandler::HandleWorldCast,                  "", nullptr },
-        
         { NODE, "notify",         SEC_MODERATOR,      true,  &ChatHandler::HandleNotifyCommand,              "", nullptr },
 		//dualspec
 		{ NODE, "tf",       SEC_PLAYER,         false,  &ChatHandler::HandleSwapSpec,            "", nullptr },

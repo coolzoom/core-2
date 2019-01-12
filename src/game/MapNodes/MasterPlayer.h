@@ -15,54 +15,9 @@ struct Mail;
 class Item;
 class Channel;
 
-enum ActionButtonUpdateState
-{
-    ACTIONBUTTON_UNCHANGED = 0,
-    ACTIONBUTTON_CHANGED   = 1,
-    ACTIONBUTTON_NEW       = 2,
-    ACTIONBUTTON_DELETED   = 3
-};
-
-enum ActionButtonType
-{
-    ACTION_BUTTON_SPELL     = 0x00,
-    ACTION_BUTTON_C         = 0x01,                         // click?
-    ACTION_BUTTON_MACRO     = 0x40,
-    ACTION_BUTTON_CMACRO    = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
-    ACTION_BUTTON_ITEM      = 0x80
-};
-
-#define ACTION_BUTTON_ACTION(X) (uint32(X) & 0x00FFFFFF)
-#define ACTION_BUTTON_TYPE(X)   ((uint32(X) & 0xFF000000) >> 24)
-#define MAX_ACTION_BUTTON_ACTION_VALUE (0x00FFFFFF+1)
-
-struct ActionButton
-{
-    uint32 packedData = 0;
-    ActionButtonUpdateState uState = ACTIONBUTTON_NEW;
-
-    // helpers
-    ActionButtonType GetType() const { return ActionButtonType(ACTION_BUTTON_TYPE(packedData)); }
-    uint32 GetAction() const { return ACTION_BUTTON_ACTION(packedData); }
-    void SetActionAndType(uint32 action, ActionButtonType type)
-    {
-        uint32 newData = action | (uint32(type) << 24);
-        if (newData != packedData || uState == ACTIONBUTTON_DELETED)
-        {
-            packedData = newData;
-            if (uState != ACTIONBUTTON_NEW)
-                uState = ACTIONBUTTON_CHANGED;
-        }
-    }
-};
-
-#define  MAX_ACTION_BUTTONS 120   // TBC 132 checked in 2.3.0
-
 typedef std::map<uint8,ActionButton> ActionButtonList;
 typedef std::deque<Mail*> PlayerMails;
-typedef std::set<uint32> SpecTalentSet;
-typedef std::unordered_map<uint8, ActionButtonList> SpecActionButtonsMap;
-typedef std::unordered_map<uint8, SpecTalentSet>    SpecTalentSetMap;
+
 class MasterPlayer
 {
 public:
@@ -94,13 +49,7 @@ public:
     PlayerSocial* GetSocial() const { return m_social; }
     void SetSocial(PlayerSocial* s) { m_social = s; }
     void LoadSocial(QueryResult* result);
-    
-    // SpecTalent
-    void LoadAlternativeSpecTalent(QueryResult *result);
-    void LoadAlternativeSpecAction(QueryResult *result);
-    void SaveAlternativeSpec();
-    ActionButtonList& GetSpecActionButtons(uint8 spec);
-    SpecTalentSet& GetSpecTalents(uint8 spec);
+
     // ACTIONS SYSTEM
     void LoadActions(QueryResult *result);
     void SaveActions();
@@ -200,8 +149,6 @@ protected:
 
     PlayerSocial* m_social;
     ActionButtonList m_actionButtons;
-    SpecActionButtonsMap m_specActionButtons;
-    SpecTalentSetMap m_specTalents;
     WorldSession* m_session;
 
     bool m_mailsUpdated;

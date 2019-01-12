@@ -81,10 +81,6 @@
 #include "Anticheat/Anticheat.h"
 #include "AuraRemovalMgr.h"
 #include "InstanceStatistics.h"
-// WARDEN
-#include "WardenCheckMgr.h"
-
-#include "QuestMgr.h"
 
 #include <chrono>
 
@@ -558,8 +554,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_MAIL,    "AllowTwoSide.Interaction.Mail", false);
     setConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_WHO_LIST,            "AllowTwoSide.WhoList", false);
     setConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_ADD_FRIEND,          "AllowTwoSide.AddFriend", false);
-    
-    setConfig(CONFIG_UINT32_WORLD_CHAT_COST, "World.Announce.Cost", 100);
+	//dual spec
+	setConfig(CONFIG_DUAL_SPEC_TIME_DELTA, "DualSpecTimeDelta", 300);
     setConfig(CONFIG_UINT32_STRICT_PLAYER_NAMES,  "StrictPlayerNames",  0);
     setConfig(CONFIG_UINT32_STRICT_CHARTER_NAMES, "StrictCharterNames", 0);
     setConfig(CONFIG_UINT32_STRICT_PET_NAMES,     "StrictPetNames",     0);
@@ -993,15 +989,6 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_NO_RESPEC_PRICE_DECAY, "Progression.NoRespecPriceDecay", true);
     setConfig(CONFIG_BOOL_NO_QUEST_XP_TO_GOLD, "Progression.NoQuestXpToGold", true);
     setConfig(CONFIG_BOOL_RESTORE_DELETED_ITEMS, "Progression.RestoreDeletedItems", true);
-    setConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED, "Warden.WinEnabled", true);
-    setConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED, "Warden.OSXEnabled", false);
-    setConfig(CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS, "Warden.NumMemChecks", 3);
-    setConfig(CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS, "Warden.NumOtherChecks", 7);
-    setConfig(CONFIG_UINT32_WARDEN_CLIENT_BAN_DURATION, "Warden.BanDuration", 86400);
-    setConfig(CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF, "Warden.ClientCheckHoldOff", 30);
-    setConfig(CONFIG_UINT32_WARDEN_CLIENT_FAIL_ACTION, "Warden.ClientCheckFailAction", 0);
-    setConfig(CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY, "Warden.ClientResponseDelay", 600);
-    setConfig(CONFIG_UINT32_WARDEN_DB_LOGLEVEL, "Warden.DBLogLevel", 0);
 
     setConfig(CONFIG_UINT32_CREATURE_SUMMON_LIMIT, "MaxCreatureSummonLimit", DEFAULT_CREATURE_SUMMON_LIMIT);
     m_creatureSummonCountLimit = getConfig(CONFIG_UINT32_CREATURE_SUMMON_LIMIT);
@@ -1311,10 +1298,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Weather Data...");
     sWeatherMgr.LoadWeatherZoneChances();
-    
-    sLog.outString("sQuestMgr initialize..."); 
-    sQuestMgr.initialize();
-    
+
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables
 
@@ -1606,15 +1590,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading anticheat library");
     sAnticheatLib->LoadAnticheatData();
-    
-    // Initialize Warden
-    sLog.outString("Loading Warden Checks...");
-    sWardenCheckMgr->LoadWardenChecks();
-    sLog.outString();
-
-    sLog.outString("Loading Warden Action Overrides...");
-    sWardenCheckMgr->LoadWardenOverrides();
-    sLog.outString();
 
     if (!isMapServer)
     {
@@ -1760,9 +1735,7 @@ void World::Update(uint32 diff)
 
     ///-Update mass mailer tasks if any
     sMassMailMgr.Update();
-    
-    sQuestMgr.Update(m_gameTime);
-    
+
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {

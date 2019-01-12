@@ -411,10 +411,7 @@ void Item::SaveToDB()
                 // questitems use the blocked field for other purposes
                 if (!qitem && item->is_blocked)
                     continue;
-                
-                if (!item->AllowedForPlayer(GetOwner(), loot.GetLootTarget()))
-                	  continue;
-                	  
+
                 stmt.addUInt32(GetGUIDLow());
                 stmt.addUInt32(ownerGuid);
                 stmt.addUInt32(item->itemid);

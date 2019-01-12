@@ -19,15 +19,6 @@
 #include "ScriptedAI.h"
 #include <ctime>
 
-// LEVEL NPC
-#define TT_DUALTALENT  90700
-#define TT_DUALTALENT_CONFIRM 8262
-#define TT_DUALTALENT_CANCEL  90601
-
-#define TT_LEVELUP    90600
-#define TT_LEVELUP_CONFIRM 8262
-#define TT_LEVELUP_CANCEL  90601
-
 // TELEPORT NPC
   
 bool GossipHello_TeleportNPC(Player *player, Creature *_Creature)   
@@ -64,17 +55,8 @@ bool GossipHello_TeleportNPC(Player *player, Creature *_Creature)
 		//player->ADD_GOSSIP_ITEM(7, "[飞行全开]", GOSSIP_SENDER_MAIN, 6040);
 		//player->ADD_GOSSIP_ITEM(7, "[拍卖行]", GOSSIP_SENDER_MAIN, 6050);
 		player->ADD_GOSSIP_ITEM(7, "[银行]", GOSSIP_SENDER_MAIN, 6060);
-
-    }
-	
-	    // levelup
-    if (player->getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-	    player->ADD_GOSSIP_ITEM(11, "升级"    , GOSSIP_SENDER_MAIN, 9);
-	  
-	  // dual talent
-	  if (player->getLevel() > 10 && player->GetMaxSpec() < 1)
-	  	player->ADD_GOSSIP_ITEM(11, "双天赋"    , GOSSIP_SENDER_MAIN, 10);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
+    }
     return true;
 }
 
@@ -139,50 +121,6 @@ void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 act
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
-        case 9:
-        	  player->ADD_GOSSIP_ITEM(7, "确认升级" , GOSSIP_SENDER_MAIN, 7010);
-            player->ADD_GOSSIP_ITEM(5,  "取消" , GOSSIP_SENDER_MAIN, 100);
-
-            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
-            break;
-            
-        case 10:
-        	  player->ADD_GOSSIP_ITEM(7, "确认双天赋"  , GOSSIP_SENDER_MAIN, 7020);
-            player->ADD_GOSSIP_ITEM(5, "取消" , GOSSIP_SENDER_MAIN, 100);
-
-            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
-            break;
-            
-        case 7010:
-        {
-        	  uint32 oldLevel = player->getLevel();
-        	  uint32 money = player->GetMoney();
-        	  if (money < 100 * GOLD)
-        	    player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, _Creature, 0, 0);
-        	  else if (oldLevel < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-        	  {
-        	  	player->GiveLevel(oldLevel + 1);
-              player->InitTalentForLevel();
-              player->SetUInt32Value(PLAYER_XP, 0);
-              player->ModifyMoney(-100 * GOLD);
-        	  }
-        	  player->CLOSE_GOSSIP_MENU();
-        	  break;
-        }
-        
-        case 7020:
-        {
-        	  uint32 money = player->GetMoney();
-        	  if (money < 1000 * GOLD * (player->GetMaxSpec() + 1))
-        	    player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, _Creature, 0, 0);
-        	  else if (player->GetMaxSpec() < 3)
-        	  {
-              player->AddMaxSpec();
-              player->ModifyMoney(-1000 * GOLD * player->GetMaxSpec());
-        	  }
-        	  player->CLOSE_GOSSIP_MENU();
-        	  break;
-        }	
         case 5551: // Instances [PAGE 2]
             player->ADD_GOSSIP_ITEM(5, "[祖尔法拉克]"            , GOSSIP_SENDER_MAIN, 1259);
             player->ADD_GOSSIP_ITEM(5, "[玛拉顿]"                , GOSSIP_SENDER_MAIN, 1260);
@@ -795,15 +733,6 @@ void SendDefaultMenu_TeleportNPC(Player *player, Creature *_Creature, uint32 act
 				player->ADD_GOSSIP_ITEM(7, "[银行]", GOSSIP_SENDER_MAIN, 6060);
                 player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             }
-			
-    // levelup
-    if (player->getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-	    player->ADD_GOSSIP_ITEM(11, "升级"    , GOSSIP_SENDER_MAIN, 9);
-	  
-	  // dual talent
-	  if (player->getLevel() > 10 && player->GetMaxSpec() < 1)
-	  	player->ADD_GOSSIP_ITEM(11, "双天赋"    , GOSSIP_SENDER_MAIN, 10);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _Creature->GetGUID());
             break;
     }
 }

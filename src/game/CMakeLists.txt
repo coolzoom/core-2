@@ -47,7 +47,6 @@ set (game_SRCS
     UnitAuraProcHandler.cpp
     Weather.cpp
     World.cpp
-    QuestMgr.cpp
     WorldSession.cpp
     AI/AggressorAI.cpp
     AI/CreatureAI.cpp
@@ -229,10 +228,6 @@ set (game_SRCS
     vmap/VMapFactory.cpp
     vmap/VMapManager2.cpp
     vmap/WorldModel.cpp
-    Warden/WardenCheckMgr.cpp
-    Warden/Warden.cpp
-    Warden/WardenMac.cpp
-    Warden/WardenWin.cpp
     AccountMgr.h
     AuraRemovalMgr.h
     AutoBroadCastMgr.h
@@ -265,7 +260,6 @@ set (game_SRCS
     UnitEvents.h
     Weather.h
     World.h
-    QuestMgr.h
     WorldSession.h
     AI/AggressorAI.h
     AI/CreatureAI.h
@@ -429,12 +423,6 @@ set (game_SRCS
     vmap/VMapManager2.h
     vmap/VMapTools.h
     vmap/WorldModel.h
-    Warden/WardenCheckMgr.h
-    Warden/Warden.h
-    Warden/WardenMac.h
-    Warden/WardenWin.h
-    Warden/Modules/WardenModuleMac.h
-    Warden/Modules/WardenModuleWin.h
 
 )
 

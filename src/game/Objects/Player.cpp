@@ -428,10 +428,6 @@ Player::Player(WorldSession *session) : Unit(),
     m_objectTypeId = TYPEID_PLAYER;
 
     m_valuesCount = PLAYER_END;
-    
-    m_activeSpec = 0;
-    m_maxSpec = 0;
-    m_shiftSpecCooldown = 0;
 
     m_honorMgr.ClearHonorData();
 
@@ -1180,42 +1176,6 @@ AutoAttackCheckResult Player::CanAutoAttackTarget(Unit const* pVictim) const
     return Unit::CanAutoAttackTarget(pVictim);
 }
 
-struct GainValue
-{
-  uint32 damageMount;
-  uint32 defenseMount;
-};
-
-static GainValue gainValuesBWL[] = 
-{
-  {550, 85},  {550, 85},  {500, 85},  {500, 75},  {500, 85},  {500, 85},  {300, 75},  {300, 75},
-  {300, 75},  {300, 75},  {300, 75},  {300, 75},  {300, 75},  {300, 75},  {300, 75},  {300, 75},
-  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},
-  {200, 66},  {200, 66},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},
-  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {20,  10},  {20,  10},  {20,  10},  {20,  10},
-  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},
-};
-
-static GainValue gainValuesTAQ[] = 
-{
-  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},
-  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},
-  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},  {200, 66},
-  {200, 66},  {200, 66},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {72,  33},
-  {72,  33},  {72,  33},  {72,  33},  {72,  33},  {20,  10},  {20,  10},  {20,  10},  {20,  10},
-  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},
-};
-
-static GainValue gainValuesNAXX[] = 
-{
-  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},
-  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},
-  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},  {100, 50},
-  {100, 50},  {100, 50},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},
-  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},
-  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},  {20,  10},
-};
-
 void Player::Update(uint32 update_diff, uint32 p_time)
 {
     if (!IsInWorld())
@@ -1233,33 +1193,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     UpdatePvPFlagTimer(update_diff);
 
     UpdatePvPContestedFlagTimer(update_diff);
-    
-    if (m_shiftSpecCooldown)
-    {
-        if (m_shiftSpecCooldown > update_diff)
-        {
-        	  m_shiftSpecCooldown -= update_diff;
-        	  
-        }
-        
-        if (m_shiftSpecCooldown <= update_diff)
-        {
-        	  m_shiftSpecCooldown = 0;
-        	  if (!GetSession()->isLogingOut() && CanFreeMove())
-            {
-              //!we can move again
-              SetMovement(MOVE_UNROOT);
 
-              //! Stand Up
-              SetStandState(UNIT_STAND_STATE_STAND);
-
-              //! DISABLE_ROTATE
-              RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-            }
-
-        }
-    }
-    
     // Delay delete duel
     if (duel && duel->finished)
     {
@@ -1306,50 +1240,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             }
         }
     }
-    
-    Aura *dmgAura = GetAura(35003, EFFECT_INDEX_0);
-    Aura *defAura = GetAura(35004, EFFECT_INDEX_0);
-    if (defAura || dmgAura)
-    {
-    	Map *pMap = GetMap();
-    	if (pMap)
-    	{
-    		  uint32 damageMount = 300;
-    		  uint32 defenceMount = 75;
-    		  if (pMap->IsDungeon())
-    		  {
-    			    uint32 members = pMap->GetPlayers().getSize();
-    			    if (pMap->GetId() == 533)
-    			    {
-    			    	  damageMount  = gainValuesNAXX[members].damageMount;
-    			        defenceMount = gainValuesNAXX[members].defenseMount;
-    			    }
-    			    else if (pMap->GetId() == 531 || 
-    			    	       pMap->GetId() == 469 || 
-    			    	       pMap->GetId() == 409)
-    			    {
-    			    	  damageMount  = gainValuesTAQ[members].damageMount;
-    			        defenceMount = gainValuesTAQ[members].defenseMount;
-    			    }
-    			    else
-    			    {
-    			        damageMount  = gainValuesBWL[members].damageMount;
-    			        defenceMount = gainValuesBWL[members].defenseMount;
-    			    }
-    	    }
-    		  else if (pMap->IsBattleGround())
-    		  {
-    			    damageMount = 0;
-    			    defenceMount = 0;
-    		  }
-    		  
-    		  if (defAura) 
-    			    defAura->GetHolder()->SetStackAmount(defenceMount);
-    		  if (dmgAura)
-    			    dmgAura->GetHolder()->SetStackAmount(damageMount);    				
-    		}
-    }
-    
+
     if (hasUnitState(UNIT_STAT_MELEE_ATTACKING))
     {
         UpdateMeleeAttackingState();
@@ -1773,7 +1664,7 @@ bool Player::BuildEnumData(QueryResult * result, WorldPacket * p_data)
     *p_data << fields[1].GetString();                       // name
     *p_data << uint8(pRace);                                // race
     *p_data << uint8(pClass);                               // class
-    *p_data << uint8(fields[4].GetUInt8() & 0x01);          // gender
+    *p_data << uint8(fields[4].GetUInt8());                 // gender
 
     uint32 playerBytes = fields[5].GetUInt32();
     *p_data << uint8(playerBytes);                          // skin
@@ -14551,10 +14442,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
     SetByteValue(UNIT_FIELD_BYTES_0, 0, fields[3].GetUInt8()); // race
     SetByteValue(UNIT_FIELD_BYTES_0, 1, fields[4].GetUInt8()); // class
 
-    uint8 gender = fields[5].GetUInt8();
-    m_activeSpec = (gender >> 4) & 0x03;
-    m_maxSpec    = (gender >> 6) & 0x03;
-    gender &= 0x01;   // allowed only 1 bit values male/female cases (for fit drunk gender part)
+    uint8 gender = fields[5].GetUInt8() & 0x01;             // allowed only 1 bit values male/female cases (for fit drunk gender part)
     SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);            // gender
 
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_UNK5);
@@ -16090,7 +15978,7 @@ void Player::SaveToDB(bool online, bool force)
     uberInsert.addString(m_name);
     uberInsert.addUInt8(getRace());
     uberInsert.addUInt8(getClass());
-    uberInsert.addUInt8(((m_maxSpec & 0x03) << 6) | ((m_activeSpec & 0x03) << 4) | (getGender() & 0x01));
+    uberInsert.addUInt8(getGender());
     uberInsert.addUInt32(getLevel());
     uberInsert.addUInt32(GetUInt32Value(PLAYER_XP));
     uberInsert.addUInt32(GetMoney());
@@ -17973,7 +17861,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
 
         LogModifyMoney(-int32(price), "BuyItem", vendorGuid, item);
 
-        pItem = StoreNewItem(dest, item, true, Item::GenerateItemRandomPropertyId(item));
+        pItem = StoreNewItem(dest, item, true);
     }
     else if (IsEquipmentPos(bag, slot))
     {
@@ -21492,87 +21380,94 @@ void Player::CreatePacketBroadcaster()
     sWorld.GetBroadcaster()->RegisterPlayer(m_broadcaster);
 }
 
-void  Player::AddMaxSpec()
+//dual spec
+void Player::_SaveAlternativeSpec()
 {
-	if (m_maxSpec < 3)
-		m_maxSpec++;
+	sLog.outError("Saving spec");
+	//At first, save spells.
+	std::ostringstream ss;
+	ss << "REPLACE INTO character_altspec (guid, altspells) VALUES ('" << GetGUIDLow() << "', '";
+	//Okay, now serialize it into string of ids, separated by whitespace
+	for (SpellIDList::iterator it = m_altspec_talents.begin(); it != m_altspec_talents.end(); it++)
+		ss << *it << " ";
+	ss << "')";
+	sLog.outError("Spells serialized");
+
+	//Nice, it saved!
+	CharacterDatabase.PExecute(ss.str().c_str());
+	sLog.outError("Spells saved");
+
+	//Now turn of action buttons
+	//Before - remove all player keys
+	// CharacterDatabase.PExecute("DELETE FROM character_altspec_action WHERE guid = '%u'", GetGUIDLow());
+	// sLog.outError("Old buttons removed");
+
+	// //Now - seek all needed keys and insert into DB
+	// for (uint32 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+	// {
+	//     //Find button by button id
+	//     ActionButtonList::const_iterator itr = m_altspec_actionButtons.find(button);
+	//     //STL returns end() if not found. We need to skip it.
+	//     if (itr != m_altspec_actionButtons.end())
+	//     {
+	//         //Okay, now we're ready to insert it
+	//         CharacterDatabase.PExecute("INSERT INTO character_altspec_action (guid,button,action,type,misc) VALUES ('%u', '%u', '%u', '%u', '%u')",
+	//             GetGUIDLow(), button, itr->second.action, itr->second.type, itr->second.misc);
+	//     }
+	// }
+	//All done
 }
 
-bool Player::SwapSpec(uint8 spec)
+uint32 Player::SwapSpec()
 {
+	/*
+		Error codes:
+		2 - Too low level
+		3 - Too fast
+
+		Strategy:
+		1) save keys
+		2) save talents
+		3) load talents
+		4) load keys
+	*/
+
 	//Level check
-	if (getLevel() <= 10 || !CanFreeMove() || GetTransport())
-	{
-		SendEquipError(EQUIP_ERR_CANT_EQUIP_SKILL, 0, 0, 0);
-		return false;
-  }
-  
-  if (spec == 0)
-  	spec = (m_activeSpec + 1) & m_maxSpec;
-  else
-  	spec -= 1;
-  
-  if (spec == m_activeSpec || spec > m_maxSpec)
-  {
-  	SendEquipError(EQUIP_ERR_CANT_EQUIP_SKILL, 0, 0, 0);
-  	return false;
-  }
-  
-  MasterPlayer *masterPlayer = GetSession()->GetMasterPlayer();
+	if (getLevel() <= 10)
+		return 2;
+
 	//Time check
-	if (!GetMap() || GetMap()->IsBattleGround())
-	{
-		SendEquipError(EQUIP_ERR_CANT_EQUIP_SKILL, 0, 0, 0);
-		return false;
-	}
-	if (m_shiftSpecCooldown || !masterPlayer || this->isInCombat() ||
-		  m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_JUMPING | MOVEFLAG_FALLINGFAR)) ||
-		  duel || HasAura(9454))
-	{
-		SendEquipError(EQUIP_ERR_CANT_EQUIP_SKILL, 0, 0, 0);
-		return false;
-	}
-	
-  m_shiftSpecCooldown = 30000;
+	if (uint32(time(NULL) - m_altspec_lastswap) < sWorld.getConfig(CONFIG_DUAL_SPEC_TIME_DELTA))
+		return 3;
+
 	/*********************************************************/
 	/***                   SAVE KEYS                       ***/
 	/*********************************************************/
-	ActionButtonList& tmpButtons = masterPlayer->GetSpecActionButtons(spec);
-	masterPlayer->GetSpecActionButtons(m_activeSpec) = masterPlayer->GetActionButtons();
-   
-//	sLog.outInfo("Keys cleaned");
-	//Aaand... load
-  for (int button = 0; button < MAX_ACTION_BUTTONS; ++button)
-	{
-      //Find button by button id
-      masterPlayer->removeActionButton(button);
-      ActionButtonList::const_iterator itr = tmpButtons.find(button);
-      //STL returns end() if not found. We need to skip it.
-	    if (itr != tmpButtons.end())
-	        masterPlayer->addActionButton(button, itr->second.GetAction(), itr->second.GetType());
-	}
-//	sLog.outError("Keys added");
-//	masterPlayer->SendInitialActionButtons();//doesnt work
+	// sLog.outError("Save keys");
+	// //Save buttons before
+	// ActionButtonList tmp_buttons = m_altspec_actionButtons;
+
+	// //Just copy current content
+	// m_altspec_actionButtons = m_actionButtons;
 
 	/*********************************************************/
 	/***                   SAVE TALENTS                    ***/
 	/*********************************************************/
-//	sLog.outError("Save talents");
+	sLog.outError("Save talents");
 	//copy current talents list
-	SpecTalentSet& newTalent = masterPlayer->GetSpecTalents(spec);
-  SpecTalentSet& curTalent = masterPlayer->GetSpecTalents(m_activeSpec);
+	SpellIDList tmp = m_altspec_talents;
+
 	//erese it for populating using current talents
-	curTalent.clear();
+	m_altspec_talents.clear();
 
 	//Find all talents, general idea from Player::resetTalents
-	for (unsigned int i = 0; i < sTalentStore.GetNumRows(); ++i) 
-	{
+	for (unsigned int i = 0; i < sTalentStore.GetNumRows(); ++i) {
 		TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
 		if (!talentInfo) continue;
 		TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
 		if (!talentTabInfo) continue;
 		if ((getClassMask() & talentTabInfo->ClassMask) == 0) continue;
-		for (int j = 0; j < MAX_TALENT_RANK; ++j) {
+		for (int j = 0; j < 5; ++j) {
 			for (PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();) {
 
 				//skip disabled talents like Pyroblast or some else
@@ -21594,7 +21489,7 @@ bool Player::SwapSpec(uint8 spec)
 				if (itrFirstId == talentInfo->RankID[j]
 					|| sSpellMgr.IsSpellLearnToSpell(talentInfo->RankID[j], itrFirstId)
 					)//|| HasSpell(spellmgr.GetSpellRequired(itrFirstId)))
-					curTalent.insert(itr->first);
+					m_altspec_talents.push_back(itr->first);
 				++itr;
 			}
 		}
@@ -21603,11 +21498,11 @@ bool Player::SwapSpec(uint8 spec)
 	/*********************************************************/
 	/***                   LOAD TALENTS                    ***/
 	/*********************************************************/
-//	sLog.outError("Load talents");
+	sLog.outError("Load talents");
 	ResetTalents(true);
-	for (SpecTalentSet::iterator it = newTalent.begin(); it != newTalent.end(); it++)
+	for (SpellIDList::iterator it = tmp.begin(); it != tmp.end(); it++)
 	{
-		LearnSpell(*it, false);
+		LearnSpell(*it, true);
 	}
 	InitTalentForLevel();
 	//learnSkillRewardedSpells();
@@ -21615,20 +21510,26 @@ bool Player::SwapSpec(uint8 spec)
 	/*********************************************************/
 	/***                   LOAD KEYS                       ***/
 	/*********************************************************/
-//  sLog.outError("Load keys");
-	//Clean up
-  m_activeSpec = spec;
-  if (CanFreeMove())
-  {
-      float height = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ());
-      if ((GetPositionZ() < height + 0.1f) && !IsInWater() && getStandState() == UNIT_STAND_STATE_STAND)
-          SetStandState(UNIT_STAND_STATE_SIT);
+	// sLog.outError("Load keys");
+	// //Clean up
+	// for (int button = 0; button < MAX_ACTION_BUTTONS; ++button)
+	//     removeActionButton(button);
+	// sLog.outError("Keys cleaned");
+	// //Aaand... load
+	// for (int button = 0; button < MAX_ACTION_BUTTONS; ++button)
+	// {
+	//     //Find button by button id
+	//     ActionButtonList::const_iterator itr = m_altspec_actionButtons.find(button);
+	//     //STL returns end() if not found. We need to skip it.
+	//     if (itr != m_altspec_actionButtons.end())
+	//         addActionButton(button, itr->second.action, itr->second.type, itr->second.misc);
+	// }
+	// sLog.outError("Keys added");
 
-      SetMovement(MOVE_ROOT);
-      SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-  }
-  
-  TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), TELE_TO_FORCE_MAP_CHANGE);
-  
-	return true; //Okay
+	// SendInitialActionButtons();//doesnt work
+
+	//Drop mana and health to minimum for preventing of profit from swappings
+	SetHealth(12);
+	SetPower(POWER_MANA, 12);
+	return 1; //Okay
 }

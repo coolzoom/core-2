@@ -372,7 +372,7 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket & /*recv_data*/)
     SendPacket(&data);
 
     // not remove flags if can't free move - its not set in Logout request code.
-    if (GetPlayer()->CanFreeMove()  && !GetPlayer()->shiftSpecCooldown())
+    if (GetPlayer()->CanFreeMove())
     {
         //!we can move again
         GetPlayer()->SetMovement(MOVE_UNROOT);
@@ -962,10 +962,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 
     uint32 action = ACTION_BUTTON_ACTION(packetData);
     uint8  type   = ACTION_BUTTON_TYPE(packetData);
-    
-    if (GetPlayer() && GetPlayer()->shiftSpecCooldown() > 20000)
-    	return ;
-    
+
     if (!packetData)
     {
         DETAIL_LOG("MISC: Remove action from button %u", button);

@@ -597,8 +597,6 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADMAILS,
     PLAYER_LOGIN_QUERY_LOADMAILEDITEMS,
     PLAYER_LOGIN_QUERY_BATTLEGROUND_DATA,
-    PLAYER_LOGIN_QUERY_LOADSPECACTIONS,
-    PLAYER_LOGIN_QUERY_LOADSPECTALENT,
 
     MAX_PLAYER_LOGIN_QUERY
 };
@@ -1306,7 +1304,8 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void _LoadBGData(QueryResult* result);
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
         void _LoadGuild(QueryResult* result);
-
+		//dual spec
+		void _LoadAlternativeSpec();
         uint32 m_atLoginFlags;
     public:
         bool LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder);
@@ -1333,7 +1332,8 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void _SaveSpells();
         void _SaveBGData();
         void _SaveStats();
-
+		//dual spec
+		void _SaveAlternativeSpec();
         void _SetCreateBits(UpdateMask* updateMask, Player* target) const;
         void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
         uint32 m_nextSave;
@@ -1377,7 +1377,11 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void RemoveMiniPet();
         Pet* GetMiniPet() const;
         void AutoReSummonPet();
-
+		//Second spec info
+		typedef std::list<uint32> SpellIDList;
+		SpellIDList m_altspec_talents;
+		//ActionButtonList m_altspec_actionButtons;
+		time_t m_altspec_lastswap;
 
 
         // use only in Pet::Unsummon/Spell::DoSummon
@@ -1469,10 +1473,7 @@ class MANGOS_DLL_SPEC Player final: public Unit
         /*********************************************************/
         /***                    STAT SYSTEM                    ***/
         /*********************************************************/
-        uint8 GetActiveSpec() const { return m_activeSpec; }
-        uint8 GetMaxSpec() const { return m_maxSpec; }
-        void  AddMaxSpec();
-        uint32 shiftSpecCooldown() const { return m_shiftSpecCooldown; }
+
     private:
         float m_modManaRegen;
         float m_modManaRegenInterrupt;
@@ -1485,11 +1486,6 @@ class MANGOS_DLL_SPEC Player final: public Unit
         bool m_canBlock;
         bool m_canDualWield;
         float m_ammoDPS;
-        
-        // dual spec
-        uint8 m_activeSpec;
-        uint8 m_maxSpec;
-        uint32 m_shiftSpecCooldown;
 
         void RegenerateAll();
         void Regenerate(Powers power);
@@ -1862,7 +1858,8 @@ class MANGOS_DLL_SPEC Player final: public Unit
 
         uint32 GetHomeBindMap() const { return m_homebindMapId; }
         uint16 GetHomeBindAreaId() const { return m_homebindAreaId; }
-
+		//dual spec
+		uint32 SwapSpec();
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
             m_summon_expire = time(nullptr) + MAX_PLAYER_SUMMON_DELAY;
@@ -2415,7 +2412,7 @@ class MANGOS_DLL_SPEC Player final: public Unit
         void SetAutoInstanceSwitch(bool v) { m_enableInstanceSwitch = v; }
         bool GetSmartInstanceBindingMode() const { return m_smartInstanceRebind; }
         void SetSmartInstanceBindingMode(bool smartRebinding) { m_smartInstanceRebind = smartRebinding; }
-        bool SwapSpec(uint8 spec);
+
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/
         /*********************************************************/
