@@ -32,6 +32,7 @@ set (EXECUTABLE_SRCS
 
 if(WIN32)
   list(APPEND EXECUTABLE_SRCS
+    ${sources_windows_Debugging}
     realmd.rc
   )
   
