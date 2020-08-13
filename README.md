@@ -1,6 +1,7 @@
 | gcc/g++           | clang/clang++     | visual studio     |
 |-------------------|-------------------|-------------------|
 | [![Build1][1]][10]| [![Build2][2]][10]| [![Build3][3]][10]|
+
 [1]: https://travis-badge.herokuapp.com/repos/vmangos/core/branches/development/1?use_travis_com=true
 [2]: https://travis-badge.herokuapp.com/repos/vmangos/core/branches/development/2?use_travis_com=true
 [3]: https://travis-badge.herokuapp.com/repos/vmangos/core/branches/development/3?use_travis_com=true
