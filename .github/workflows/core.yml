@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: befor install
       run: |
-          sudo apt-get -qq install libmysql++-dev libace-dev libtbb-dev libcurl4-openssl-dev
+          sudo apt-get -qq install libmysql++-dev libace-dev libtbb-dev
           sudo apt-get -qq install cmake build-essential cppcheck git make binutils-dev libiberty-dev openssl libssl-dev
     - uses: actions/checkout@v2
     - name: Build & install
